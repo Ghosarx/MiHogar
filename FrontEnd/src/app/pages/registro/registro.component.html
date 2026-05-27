@@ -1,0 +1,376 @@
+<section class="auth">
+  <div class="container auth__inner">
+    <div class="auth__card">
+      @if (successMessage()) {
+        <div class="auth__success" role="status">
+          <svg viewBox="0 0 24 24" width="36" height="36" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <path d="M8 12.5l3 3 5-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p class="auth__success-text">{{ successMessage() }}</p>
+          @switch (successType()) {
+            @case ('login') {
+              <button type="button" class="btn btn--primary" (click)="navigateToHome()">
+                Ir al inicio
+              </button>
+            }
+            @case ('register') {
+              <button type="button" class="btn btn--outline" (click)="goToLogin()">
+                Iniciar sesión ahora
+              </button>
+            }
+            @case ('reset') {
+              <button type="button" class="btn btn--primary" (click)="goToLogin()">
+                Volver a iniciar sesión
+              </button>
+            }
+          }
+        </div>
+      } @else {
+        @switch (mode()) {
+          <!-- ========== LOGIN ========== -->
+          @case ('login') {
+            <header class="auth__header">
+              <h1 class="auth__title">Bienvenido a MiHogar</h1>
+              <p class="auth__subtitle">Inicia sesión o crea una cuenta nueva.</p>
+            </header>
+
+            <div class="tabs" role="tablist" aria-label="Tipo de acceso">
+              <button
+                type="button"
+                role="tab"
+                [class.is-active]="mode() === 'login'"
+                [attr.aria-selected]="mode() === 'login'"
+                (click)="setMode('login')"
+              >Iniciar sesión</button>
+              <button
+                type="button"
+                role="tab"
+                [class.is-active]="mode() === 'register'"
+                [attr.aria-selected]="mode() === 'register'"
+                (click)="setMode('register')"
+              >Registrarse</button>
+            </div>
+
+            <form [formGroup]="loginForm" (ngSubmit)="onLogin()" novalidate class="auth__form">
+              <label class="field">
+                <span class="field__label">Correo electrónico</span>
+                <input
+                  type="email"
+                  formControlName="correo"
+                  placeholder="tu@correo.com"
+                  autocomplete="email"
+                  class="field__input"
+                  [class.is-invalid]="shouldShowError(loginForm, 'correo')"
+                />
+                @if (shouldShowError(loginForm, 'correo')) {
+                  <small class="field__error">{{ errorMessage(loginForm, 'correo') }}</small>
+                }
+              </label>
+
+              <label class="field">
+                <span class="field__label">Contraseña</span>
+                <input
+                  type="password"
+                  formControlName="contrasena"
+                  placeholder="Tu contraseña"
+                  autocomplete="current-password"
+                  class="field__input"
+                  [class.is-invalid]="shouldShowError(loginForm, 'contrasena')"
+                />
+                @if (shouldShowError(loginForm, 'contrasena')) {
+                  <small class="field__error">{{ errorMessage(loginForm, 'contrasena') }}</small>
+                }
+              </label>
+
+              <button
+                type="button"
+                class="auth__link"
+                (click)="goToForgot()"
+              >¿Olvidaste tu contraseña?</button>
+
+              @if (apiError()) {
+                <div class="auth__error" role="alert" style="color:#dc2626;font-size:14px;margin-bottom:8px;padding:8px 12px;background:#fef2f2;border-radius:6px;border:1px solid #fecaca;">
+                  {{ apiError() }}
+                </div>
+              }
+              <button type="submit" class="btn btn--primary auth__submit" [disabled]="loading()">
+                {{ loading() ? 'Iniciando sesión...' : 'Iniciar sesión' }}
+              </button>
+            </form>
+          }
+
+          <!-- ========== REGISTER ========== -->
+          @case ('register') {
+            <header class="auth__header">
+              <h1 class="auth__title">Crear cuenta</h1>
+              <p class="auth__subtitle">Únete a MiHogar y empieza a explorar propiedades.</p>
+            </header>
+
+            <div class="tabs" role="tablist" aria-label="Tipo de acceso">
+              <button
+                type="button"
+                role="tab"
+                [class.is-active]="mode() === 'login'"
+                [attr.aria-selected]="mode() === 'login'"
+                (click)="setMode('login')"
+              >Iniciar sesión</button>
+              <button
+                type="button"
+                role="tab"
+                [class.is-active]="mode() === 'register'"
+                [attr.aria-selected]="mode() === 'register'"
+                (click)="setMode('register')"
+              >Registrarse</button>
+            </div>
+
+            <form [formGroup]="registerForm" (ngSubmit)="onRegister()" novalidate class="auth__form">
+              <label class="field">
+                <span class="field__label">Nombre completo</span>
+                <input
+                  type="text"
+                  formControlName="nombre"
+                  placeholder="Ej. María García"
+                  autocomplete="name"
+                  class="field__input"
+                  [class.is-invalid]="shouldShowError(registerForm, 'nombre')"
+                />
+                @if (shouldShowError(registerForm, 'nombre')) {
+                  <small class="field__error">{{ errorMessage(registerForm, 'nombre') }}</small>
+                }
+              </label>
+
+              <label class="field">
+                <span class="field__label">Correo electrónico</span>
+                <input
+                  type="email"
+                  formControlName="correo"
+                  placeholder="tu@correo.com"
+                  autocomplete="email"
+                  class="field__input"
+                  [class.is-invalid]="shouldShowError(registerForm, 'correo')"
+                />
+                @if (shouldShowError(registerForm, 'correo')) {
+                  <small class="field__error">{{ errorMessage(registerForm, 'correo') }}</small>
+                }
+              </label>
+
+              <label class="field">
+                <span class="field__label">Contraseña</span>
+                <input
+                  type="password"
+                  formControlName="contrasena"
+                  placeholder="Mínimo 8 caracteres"
+                  autocomplete="new-password"
+                  class="field__input"
+                  [class.is-invalid]="shouldShowError(registerForm, 'contrasena')"
+                />
+                @if (shouldShowError(registerForm, 'contrasena')) {
+                  <small class="field__error">{{ errorMessage(registerForm, 'contrasena') }}</small>
+                }
+              </label>
+
+              <label class="field">
+                <span class="field__label">Teléfono</span>
+                <input
+                  type="tel"
+                  formControlName="telefono"
+                  placeholder="987654321"
+                  autocomplete="tel"
+                  class="field__input"
+                  [class.is-invalid]="shouldShowError(registerForm, 'telefono')"
+                />
+                @if (shouldShowError(registerForm, 'telefono')) {
+                  <small class="field__error">{{ errorMessage(registerForm, 'telefono') }}</small>
+                }
+              </label>
+
+              @if (apiError()) {
+                <div class="auth__error" role="alert" style="color:#dc2626;font-size:14px;margin-bottom:8px;padding:8px 12px;background:#fef2f2;border-radius:6px;border:1px solid #fecaca;">
+                  {{ apiError() }}
+                </div>
+              }
+              <button type="submit" class="btn btn--primary auth__submit" [disabled]="loading()">
+                {{ loading() ? 'Creando cuenta...' : 'Crear cuenta' }}
+              </button>
+            </form>
+          }
+
+          <!-- ========== FORGOT: STEP 1 — EMAIL ========== -->
+          @case ('forgot-email') {
+            <button type="button" class="auth__back" (click)="setMode('login')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Volver
+            </button>
+
+            <header class="auth__header">
+              <h1 class="auth__title">Recuperar contraseña</h1>
+              <p class="auth__subtitle">
+                Te enviaremos un código de 6 dígitos a tu correo para verificar tu identidad.
+              </p>
+            </header>
+
+            <ol class="stepper" aria-label="Paso 1 de 3">
+              <li class="stepper__step is-active"></li>
+              <li class="stepper__step"></li>
+              <li class="stepper__step"></li>
+            </ol>
+
+            <form
+              [formGroup]="forgotEmailForm"
+              (ngSubmit)="onForgotEmail()"
+              novalidate
+              class="auth__form"
+            >
+              <label class="field">
+                <span class="field__label">Correo electrónico</span>
+                <input
+                  type="email"
+                  formControlName="correo"
+                  placeholder="tu@correo.com"
+                  autocomplete="email"
+                  class="field__input"
+                  [class.is-invalid]="shouldShowError(forgotEmailForm, 'correo')"
+                />
+                @if (shouldShowError(forgotEmailForm, 'correo')) {
+                  <small class="field__error">{{ errorMessage(forgotEmailForm, 'correo') }}</small>
+                }
+              </label>
+
+              @if (apiError()) {
+                <div class="auth__error" role="alert" style="color:#dc2626;font-size:14px;margin-bottom:8px;padding:8px 12px;background:#fef2f2;border-radius:6px;border:1px solid #fecaca;">
+                  {{ apiError() }}
+                </div>
+              }
+              <button type="submit" class="btn btn--primary auth__submit" [disabled]="loading()">
+                {{ loading() ? 'Enviando...' : 'Enviar código' }}
+              </button>
+            </form>
+          }
+
+          <!-- ========== FORGOT: STEP 2 — CODE ========== -->
+          @case ('forgot-code') {
+            <button type="button" class="auth__back" (click)="setMode('forgot-email')">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
+                <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Volver
+            </button>
+
+            <header class="auth__header">
+              <h1 class="auth__title">Ingresa el código</h1>
+              <p class="auth__subtitle">
+                Enviamos un código de 6 dígitos a <strong>{{ recoveryEmail() }}</strong>.
+              </p>
+            </header>
+
+            <ol class="stepper" aria-label="Paso 2 de 3">
+              <li class="stepper__step is-done"></li>
+              <li class="stepper__step is-active"></li>
+              <li class="stepper__step"></li>
+            </ol>
+
+            <form
+              [formGroup]="forgotCodeForm"
+              (ngSubmit)="onForgotCode()"
+              novalidate
+              class="auth__form"
+            >
+              <label class="field">
+                <span class="field__label">Código de verificación</span>
+                <input
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="6"
+                  formControlName="codigo"
+                  placeholder="000000"
+                  autocomplete="one-time-code"
+                  class="field__input field__input--code"
+                  [class.is-invalid]="shouldShowError(forgotCodeForm, 'codigo')"
+                />
+                @if (shouldShowError(forgotCodeForm, 'codigo')) {
+                  <small class="field__error">{{ errorMessage(forgotCodeForm, 'codigo') }}</small>
+                }
+              </label>
+
+              @if (apiError()) {
+                <div class="auth__error" role="alert" style="color:#dc2626;font-size:14px;margin-bottom:8px;padding:8px 12px;background:#fef2f2;border-radius:6px;border:1px solid #fecaca;">
+                  {{ apiError() }}
+                </div>
+              }
+              <button type="submit" class="btn btn--primary auth__submit" [disabled]="loading()">
+                {{ loading() ? 'Verificando...' : 'Verificar código' }}
+              </button>
+            </form>
+          }
+
+          <!-- ========== FORGOT: STEP 3 — NEW PASSWORD ========== -->
+          @case ('forgot-newpassword') {
+            <header class="auth__header">
+              <h1 class="auth__title">Nueva contraseña</h1>
+              <p class="auth__subtitle">
+                Crea una contraseña nueva y segura para tu cuenta.
+              </p>
+            </header>
+
+            <ol class="stepper" aria-label="Paso 3 de 3">
+              <li class="stepper__step is-done"></li>
+              <li class="stepper__step is-done"></li>
+              <li class="stepper__step is-active"></li>
+            </ol>
+
+            <form
+              [formGroup]="forgotPasswordForm"
+              (ngSubmit)="onForgotNewPassword()"
+              novalidate
+              class="auth__form"
+            >
+              <label class="field">
+                <span class="field__label">Nueva contraseña</span>
+                <input
+                  type="password"
+                  formControlName="contrasena"
+                  placeholder="Mínimo 8 caracteres"
+                  autocomplete="new-password"
+                  class="field__input"
+                  [class.is-invalid]="shouldShowError(forgotPasswordForm, 'contrasena')"
+                />
+                @if (shouldShowError(forgotPasswordForm, 'contrasena')) {
+                  <small class="field__error">{{ errorMessage(forgotPasswordForm, 'contrasena') }}</small>
+                }
+              </label>
+
+              <label class="field">
+                <span class="field__label">Confirmar contraseña</span>
+                <input
+                  type="password"
+                  formControlName="confirmar"
+                  placeholder="Repite tu contraseña"
+                  autocomplete="new-password"
+                  class="field__input"
+                  [class.is-invalid]="shouldShowError(forgotPasswordForm, 'confirmar') || passwordMismatch()"
+                />
+                @if (shouldShowError(forgotPasswordForm, 'confirmar')) {
+                  <small class="field__error">{{ errorMessage(forgotPasswordForm, 'confirmar') }}</small>
+                } @else if (passwordMismatch()) {
+                  <small class="field__error">Las contraseñas no coinciden.</small>
+                }
+              </label>
+
+              @if (apiError()) {
+                <div class="auth__error" role="alert" style="color:#dc2626;font-size:14px;margin-bottom:8px;padding:8px 12px;background:#fef2f2;border-radius:6px;border:1px solid #fecaca;">
+                  {{ apiError() }}
+                </div>
+              }
+              <button type="submit" class="btn btn--primary auth__submit" [disabled]="loading()">
+                {{ loading() ? 'Guardando...' : 'Guardar contraseña' }}
+              </button>
+            </form>
+          }
+        }
+      }
+    </div>
+  </div>
+</section>

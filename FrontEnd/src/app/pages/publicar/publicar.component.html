@@ -1,0 +1,239 @@
+<section class="publicar">
+  <div class="container publicar__inner">
+    <div class="publicar__card">
+      @if (successData(); as success) {
+        <div class="publicar__success" role="status">
+          <svg viewBox="0 0 24 24" width="44" height="44" fill="none" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <path d="M8 12.5l3 3 5-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h2 class="publicar__success-title">¡Propiedad publicada!</h2>
+          <p class="publicar__success-text">
+            "{{ success.titulo }}" ya está disponible en el catálogo de
+            <strong>{{ success.tipo === 'venta' ? 'venta' : 'alquiler' }}</strong>.
+          </p>
+          <div class="publicar__success-actions">
+            <button type="button" class="btn btn--primary" (click)="goToCatalogo()">
+              Ver en catálogo
+            </button>
+            <button type="button" class="btn btn--outline" (click)="publishAnother()">
+              Publicar otra
+            </button>
+          </div>
+        </div>
+      } @else {
+        <header class="publicar__header">
+          <h1 class="publicar__title">Publicar propiedad</h1>
+          <p class="publicar__subtitle">
+            Comparte tu propiedad con miles de personas buscando un hogar.
+          </p>
+        </header>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="publicar__form">
+          <!-- Tipo de transacción -->
+          <fieldset class="publicar__tipo">
+            <legend class="publicar__tipo-legend">Tipo de transacción</legend>
+            <div class="publicar__tipo-options">
+              <label class="radio">
+                <input type="radio" formControlName="tipo" value="venta" />
+                <span class="radio__indicator"></span>
+                <span class="radio__label">Venta</span>
+              </label>
+              <label class="radio">
+                <input type="radio" formControlName="tipo" value="alquiler" />
+                <span class="radio__indicator"></span>
+                <span class="radio__label">Alquiler</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <label class="field">
+            <span class="field__label">Título</span>
+            <input
+              type="text"
+              formControlName="titulo"
+              placeholder="Ej. Departamento moderno en Miraflores"
+              class="field__input"
+              [class.is-invalid]="shouldShowError('titulo')"
+            />
+            @if (shouldShowError('titulo')) {
+              <small class="field__error">{{ errorMessage('titulo') }}</small>
+            }
+          </label>
+
+          <label class="field">
+            <span class="field__label">Dirección</span>
+            <input
+              type="text"
+              formControlName="direccion"
+              placeholder="Ej. Av. Larco 1234, Miraflores"
+              class="field__input"
+              [class.is-invalid]="shouldShowError('direccion')"
+            />
+            @if (shouldShowError('direccion')) {
+              <small class="field__error">{{ errorMessage('direccion') }}</small>
+            }
+          </label>
+
+          <label class="field">
+            <span class="field__label">
+              Precio
+              <span class="field__hint">({{ form.controls.tipo.value === 'venta' ? 'USD total' : 'PEN / mes' }})</span>
+            </span>
+            <input
+              type="number"
+              formControlName="precio"
+              min="0"
+              step="100"
+              placeholder="Ej. 250000"
+              class="field__input"
+              [class.is-invalid]="shouldShowError('precio')"
+            />
+            @if (shouldShowError('precio')) {
+              <small class="field__error">{{ errorMessage('precio') }}</small>
+            }
+          </label>
+
+          <div class="publicar__row">
+            <label class="field">
+              <span class="field__label">Habitaciones</span>
+              <input
+                type="number"
+                formControlName="habitaciones"
+                min="0"
+                step="1"
+                placeholder="0"
+                class="field__input"
+                [class.is-invalid]="shouldShowError('habitaciones')"
+              />
+              @if (shouldShowError('habitaciones')) {
+                <small class="field__error">{{ errorMessage('habitaciones') }}</small>
+              }
+            </label>
+
+            <label class="field">
+              <span class="field__label">Baños</span>
+              <input
+                type="number"
+                formControlName="banos"
+                min="0"
+                step="1"
+                placeholder="0"
+                class="field__input"
+                [class.is-invalid]="shouldShowError('banos')"
+              />
+              @if (shouldShowError('banos')) {
+                <small class="field__error">{{ errorMessage('banos') }}</small>
+              }
+            </label>
+
+            <label class="field">
+              <span class="field__label">Metraje (m²)</span>
+              <input
+                type="number"
+                formControlName="metraje"
+                min="1"
+                step="1"
+                placeholder="80"
+                class="field__input"
+                [class.is-invalid]="shouldShowError('metraje')"
+              />
+              @if (shouldShowError('metraje')) {
+                <small class="field__error">{{ errorMessage('metraje') }}</small>
+              }
+            </label>
+          </div>
+
+          <label class="field">
+            <span class="field__label">Descripción</span>
+            <textarea
+              formControlName="descripcion"
+              rows="4"
+              placeholder="Describe la propiedad, sus características y entorno..."
+              class="field__input field__input--textarea"
+              [class.is-invalid]="shouldShowError('descripcion')"
+            ></textarea>
+            @if (shouldShowError('descripcion')) {
+              <small class="field__error">{{ errorMessage('descripcion') }}</small>
+            }
+          </label>
+
+          <!-- Drag & drop -->
+          <div class="dropzone-wrap">
+            <span class="field__label">Imágenes (opcional)</span>
+
+            <label
+              class="dropzone"
+              [class.is-dragging]="isDragging()"
+              (dragover)="onDragOver($event)"
+              (dragleave)="onDragLeave($event)"
+              (drop)="onDrop($event)"
+            >
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                (change)="onFileSelect($event)"
+                class="dropzone__input"
+              />
+
+              <svg
+                class="dropzone__icon"
+                viewBox="0 0 24 24"
+                width="40"
+                height="40"
+                fill="none"
+                aria-hidden="true"
+              >
+                <path d="M12 4v12m0-12l-4 4m4-4l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M5 18v.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+
+              <p class="dropzone__primary">
+                @if (isDragging()) {
+                  Suelta para agregar
+                } @else {
+                  Arrastra tus imágenes aquí
+                }
+              </p>
+              <p class="dropzone__secondary">o haz click para seleccionarlas</p>
+            </label>
+
+            @if (fileNames().length > 0) {
+              <ul class="filelist">
+                @for (name of fileNames(); track $index; let i = $index) {
+                  <li class="filelist__item">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" aria-hidden="true">
+                      <rect x="4" y="3" width="16" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/>
+                      <path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                    <span class="filelist__name">{{ name }}</span>
+                    <button
+                      type="button"
+                      class="filelist__remove"
+                      [attr.aria-label]="'Quitar ' + name"
+                      (click)="removeFile(i)"
+                    >
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+                        <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                      </svg>
+                    </button>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+
+          @if (errorMsg()) {
+            <div role="alert" style="color:#dc2626;font-size:14px;margin-bottom:8px;padding:8px 12px;background:#fef2f2;border-radius:6px;border:1px solid #fecaca;">
+              {{ errorMsg() }}
+            </div>
+          }
+          <button type="submit" class="btn btn--primary publicar__submit" [disabled]="loading()">
+            {{ loading() ? 'Publicando...' : 'Publicar propiedad' }}
+          </button>
+        </form>
+      }
+    </div>
+  </div>
+</section>

@@ -1,0 +1,35 @@
+<article class="card">
+  <div class="card__media">
+    <span class="card__badge">{{ badgeLabel() }}</span>
+    <img
+      [src]="property().imagen"
+      [alt]="property().titulo"
+      class="card__image"
+      loading="lazy"
+    />
+  </div>
+
+  <div class="card__body">
+    <h3 class="card__title">{{ property().titulo }}</h3>
+
+    <p class="card__location">
+      <svg class="card__icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 21s-7-7.5-7-12a7 7 0 1 1 14 0c0 4.5-7 12-7 12Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        <circle cx="12" cy="9.5" r="2.5" stroke="currentColor" stroke-width="1.8"/>
+      </svg>
+      {{ property().ubicacion }}
+    </p>
+
+    <p class="card__price">{{ priceLabel() }}</p>
+
+    <ul class="card__features">
+      <li>{{ property().habitaciones }} hab</li>
+      <li>{{ property().banos }} baños</li>
+      <li>{{ property().metraje }} m²</li>
+    </ul>
+
+    <button type="button" class="card__button" (click)="onDetailClick()">
+      Ver Detalles
+    </button>
+  </div>
+</article>

@@ -1,0 +1,76 @@
+<section class="hero">
+  <div class="container hero__inner">
+    <div class="hero__content">
+      <span class="hero__eyebrow">Encuentra tu próximo hogar</span>
+
+      <h1 class="hero__title">
+        Encuentra el lugar perfecto
+        <span class="hero__title-accent">para vivir</span>
+      </h1>
+
+      <p class="hero__subtitle">
+        Descubre propiedades en venta y alquiler en las mejores zonas,
+        con filtros que se ajustan a lo que buscas.
+      </p>
+
+      <form
+        class="search-card"
+        [formGroup]="searchForm"
+        (ngSubmit)="onSubmit()"
+        aria-label="Buscar propiedades"
+      >
+        <fieldset class="search-card__tipo">
+          <legend class="search-card__tipo-legend">Quiero</legend>
+
+          <label class="radio">
+            <input type="radio" formControlName="tipo" value="venta" />
+            <span class="radio__indicator"></span>
+            <span class="radio__label">Comprar</span>
+          </label>
+
+          <label class="radio">
+            <input type="radio" formControlName="tipo" value="alquiler" />
+            <span class="radio__indicator"></span>
+            <span class="radio__label">Alquilar</span>
+          </label>
+        </fieldset>
+
+        <div class="search-card__fields">
+          <label class="field">
+            <span class="field__label">Precio máximo</span>
+            <input
+              type="number"
+              min="0"
+              step="100"
+              formControlName="precioMax"
+              placeholder="Ej. 250000"
+              class="field__input"
+            />
+          </label>
+
+          <label class="field">
+            <span class="field__label">Ubicación</span>
+            <input
+              type="text"
+              formControlName="ubicacion"
+              placeholder="Ej. Miraflores"
+              class="field__input"
+            />
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn--primary search-card__submit">
+          Buscar propiedades
+        </button>
+      </form>
+    </div>
+
+    <div class="hero__media">
+      <img
+        src="https://www.ciudaris.com/wp-content/uploads/encontrar-departamento-chiclayo.jpg"
+        alt="Interior de un departamento moderno con luz natural"
+        class="hero__image"
+      />
+    </div>
+  </div>
+</section>

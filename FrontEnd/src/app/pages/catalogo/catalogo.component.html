@@ -1,0 +1,77 @@
+<section class="catalogo">
+  <div class="container catalogo__inner">
+    <header class="catalogo__header">
+      <h1 class="catalogo__title">{{ titulo() }}</h1>
+      <p class="catalogo__count">
+        {{ filteredProperties().length }}
+        {{ filteredProperties().length === 1 ? 'resultado' : 'resultados' }}
+      </p>
+    </header>
+
+    <div class="catalogo__layout">
+      <aside class="filters" [formGroup]="filterForm" aria-label="Filtros de búsqueda">
+        <header class="filters__header">
+          <h2 class="filters__title">Filtros</h2>
+          <button type="button" class="filters__reset" (click)="resetFilters()">Limpiar</button>
+        </header>
+
+        <fieldset class="filters__group">
+          <legend class="filters__legend">Rango de precio</legend>
+          <div class="filters__row">
+            <label class="field field--compact">
+              <span class="field__label">Mínimo</span>
+              <input type="number" formControlName="precioMin" min="0" step="100" placeholder="0" class="field__input" />
+            </label>
+            <label class="field field--compact">
+              <span class="field__label">Máximo</span>
+              <input type="number" formControlName="precioMax" min="0" step="100" placeholder="∞" class="field__input" />
+            </label>
+          </div>
+        </fieldset>
+
+        <label class="field">
+          <span class="field__label">Habitaciones (mín.)</span>
+          <input type="number" formControlName="habitaciones" min="0" step="1" placeholder="Cualquiera" class="field__input" />
+        </label>
+
+        <label class="field">
+          <span class="field__label">Baños (mín.)</span>
+          <input type="number" formControlName="banos" min="0" step="1" placeholder="Cualquiera" class="field__input" />
+        </label>
+
+        <label class="field">
+          <span class="field__label">Ubicación</span>
+          <input type="text" formControlName="ubicacion" placeholder="Ej. Miraflores" class="field__input" />
+        </label>
+      </aside>
+
+      <div class="catalogo__results">
+
+        @if (propertyService.loading()) {
+          <div class="catalogo__empty">
+            <p class="catalogo__empty-text">Cargando propiedades...</p>
+          </div>
+        } @else if (propertyService.error()) {
+          <div class="catalogo__empty">
+            <p class="catalogo__empty-text">{{ propertyService.error() }}</p>
+            <button type="button" class="btn btn--outline" (click)="propertyService.loadProperties(tipo())">
+              Reintentar
+            </button>
+          </div>
+        } @else if (filteredProperties().length > 0) {
+          <div class="catalogo__grid">
+            @for (prop of filteredProperties(); track prop.id) {
+              <app-property-card [property]="prop" (detailClick)="onPropertyClick($event)" />
+            }
+          </div>
+        } @else {
+          <div class="catalogo__empty">
+            <p class="catalogo__empty-text">No encontramos propiedades que coincidan con tus filtros.</p>
+            <button type="button" class="btn btn--outline" (click)="resetFilters()">Limpiar filtros</button>
+          </div>
+        }
+
+      </div>
+    </div>
+  </div>
+</section>

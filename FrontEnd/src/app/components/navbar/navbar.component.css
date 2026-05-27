@@ -1,0 +1,207 @@
+:host {
+  display: block;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar {
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.navbar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+  position: relative;
+}
+
+.navbar__brand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo-MiHogar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-primary);
+  transition: color var(--transition-fast);
+}
+
+.logo-MiHogar__icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+.logo-MiHogar__text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.navbar__brand:hover .logo-MiHogar {
+  color: var(--color-support);
+}
+
+/* === Botón hamburguesa === */
+.navbar__toggle {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 28px;
+  height: 22px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.navbar__toggle-bar {
+  display: block;
+  width: 100%;
+  height: 3px;
+  background: var(--color-primary);
+  border-radius: 2px;
+  transform-origin: center;
+  transition:
+    transform var(--transition-base),
+    opacity var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.navbar__toggle:hover .navbar__toggle-bar {
+  background: var(--color-support);
+}
+
+.navbar__toggle.is-open .navbar__toggle-bar:nth-child(1) {
+  transform: translateY(9.5px) rotate(45deg);
+}
+.navbar__toggle.is-open .navbar__toggle-bar:nth-child(2) {
+  opacity: 0;
+}
+.navbar__toggle.is-open .navbar__toggle-bar:nth-child(3) {
+  transform: translateY(-9.5px) rotate(-45deg);
+}
+
+/* === Menú (móvil first) === */
+.navbar__menu {
+  position: absolute;
+  top: 72px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  padding-inline: var(--space-5);
+  transition:
+    max-height var(--transition-base),
+    opacity var(--transition-base),
+    padding var(--transition-base);
+}
+
+.navbar__menu.is-open {
+  max-height: 480px;
+  opacity: 1;
+  padding-block: var(--space-4);
+}
+
+.navbar__link {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-primary);
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition:
+    color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.navbar__link:hover {
+  color: var(--color-support);
+  background: var(--color-bg-soft);
+}
+
+.navbar__link.is-active {
+  color: var(--color-support);
+  background: var(--color-surface);
+}
+
+.navbar__link--ghost {
+  border: 1.5px solid var(--color-primary);
+  text-align: center;
+  margin-top: var(--space-2);
+}
+
+.navbar__link--ghost:hover,
+.navbar__link--ghost.is-active {
+  background: var(--color-surface);
+  color: var(--color-primary);
+}
+
+.navbar__link--cta {
+  background: var(--color-primary);
+  color: var(--color-bg);
+  text-align: center;
+  margin-top: var(--space-2);
+}
+
+.navbar__link--cta:hover,
+.navbar__link--cta.is-active {
+  background: var(--color-primary-hover);
+  color: var(--color-bg);
+}
+
+/* === Desktop === */
+@media (min-width: 768px) {
+  .navbar__toggle {
+    display: none;
+  }
+
+  .navbar__menu {
+    position: static;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--space-2);
+    max-height: none;
+    overflow: visible;
+    opacity: 1;
+    background: none;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .navbar__menu.is-open {
+    padding: 0;
+  }
+
+  .navbar__link {
+    padding: var(--space-2) var(--space-4);
+  }
+
+  .navbar__link--ghost {
+    margin-top: 0;
+    margin-left: var(--space-2);
+    padding-inline: var(--space-4);
+  }
+
+  .navbar__link--cta {
+    margin-top: 0;
+    margin-left: var(--space-1);
+    padding-inline: var(--space-5);
+  }
+}
