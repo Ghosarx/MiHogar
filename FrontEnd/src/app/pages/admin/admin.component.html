@@ -2,71 +2,159 @@
   <div class="container admin__inner">
     <h1 class="admin__title">Panel de Administración</h1>
 
-    <!-- Tabs -->
     <nav class="admin__tabs">
-      <button type="button" class="admin__tab" [class.is-active]="activeTab() === 'metricas'" (click)="setTab('metricas')">
-        📊 Métricas
-      </button>
-      <button type="button" class="admin__tab" [class.is-active]="activeTab() === 'usuarios'" (click)="setTab('usuarios')">
-        👥 Usuarios
-      </button>
+      <button type="button" class="admin__tab" [class.is-active]="activeTab() === 'metricas'" (click)="setTab('metricas')">Métricas</button>
+      <button type="button" class="admin__tab" [class.is-active]="activeTab() === 'usuarios'" (click)="setTab('usuarios')">Usuarios</button>
     </nav>
 
-    <!-- Mensajes globales -->
-    @if (successMsg()) {
-      <div class="alert alert--success">✓ {{ successMsg() }}</div>
-    }
-    @if (errorMsg()) {
-      <div class="alert alert--error">✗ {{ errorMsg() }}</div>
-    }
+    @if (successMsg()) { <div class="alert alert--success">{{ successMsg() }}</div> }
+    @if (errorMsg())   { <div class="alert alert--error">{{ errorMsg() }}</div> }
 
-    <!-- ── TAB: MÉTRICAS ── -->
+    <!-- ── TAB MÉTRICAS ─────────────────────────────────────────────────── -->
     @if (activeTab() === 'metricas') {
       @if (metrics(); as m) {
-        <div class="metrics">
-          <div class="metric-card metric-card--blue">
-            <span class="metric-card__value">{{ m.totalUsuarios }}</span>
-            <span class="metric-card__label">Usuarios registrados</span>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+          <div class="kpi-card kpi-card--blue">
+            <div class="kpi-card__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="kpi-card__body">
+              <span class="kpi-card__value">{{ m.totalUsuarios }}</span>
+              <span class="kpi-card__label">Usuarios registrados</span>
+            </div>
           </div>
-          <div class="metric-card metric-card--teal">
-            <span class="metric-card__value">{{ m.totalPropiedades }}</span>
-            <span class="metric-card__label">Propiedades totales</span>
+
+          <div class="kpi-card kpi-card--teal">
+            <div class="kpi-card__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9.5L12 3L21 9.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <div class="kpi-card__body">
+              <span class="kpi-card__value">{{ m.totalPropiedades }}</span>
+              <span class="kpi-card__label">Propiedades totales</span>
+            </div>
           </div>
-          <div class="metric-card metric-card--green">
-            <span class="metric-card__value">{{ m.propiedadesVenta }}</span>
-            <span class="metric-card__label">En venta</span>
+
+          <div class="kpi-card kpi-card--green">
+            <div class="kpi-card__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            </div>
+            <div class="kpi-card__body">
+              <span class="kpi-card__value">{{ m.propiedadesActivas }}</span>
+              <span class="kpi-card__label">Propiedades activas</span>
+            </div>
           </div>
-          <div class="metric-card metric-card--orange">
-            <span class="metric-card__value">{{ m.propiedadesAlquiler }}</span>
-            <span class="metric-card__label">En alquiler</span>
-          </div>
-          <div class="metric-card metric-card--yellow">
-            <span class="metric-card__value">{{ m.propiedadesPendientes }}</span>
-            <span class="metric-card__label">Pendientes de aprobación</span>
-          </div>
-          <div class="metric-card metric-card--green">
-            <span class="metric-card__value">{{ m.propiedadesActivas }}</span>
-            <span class="metric-card__label">Propiedades activas</span>
-          </div>
-          <div class="metric-card metric-card--red">
-            <span class="metric-card__value">{{ m.propiedadesRechazadas }}</span>
-            <span class="metric-card__label">Rechazadas</span>
-          </div>
-          <div class="metric-card metric-card--purple">
-            <span class="metric-card__value">{{ m.propiedadesVendidas }}</span>
-            <span class="metric-card__label">Vendidas</span>
-          </div>
-          <div class="metric-card metric-card--teal">
-            <span class="metric-card__value">{{ m.totalContactClicks }}</span>
-            <span class="metric-card__label">Clicks de contacto</span>
+
+          <div class="kpi-card kpi-card--orange">
+            <div class="kpi-card__icon">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.07 1.2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16.92z"/></svg>
+            </div>
+            <div class="kpi-card__body">
+              <span class="kpi-card__value">{{ m.totalContactClicks }}</span>
+              <span class="kpi-card__label">Clicks de contacto</span>
+            </div>
           </div>
         </div>
+
+        <!-- Fila de gráficas -->
+        <div class="charts-row">
+
+          <!-- Donut — Venta vs Alquiler -->
+          <div class="chart-card">
+            <h3 class="chart-card__title">Distribución por tipo</h3>
+            <div class="donut-wrap">
+              <svg class="donut" viewBox="0 0 100 100" width="160" height="160">
+                <circle class="donut__bg" cx="50" cy="50" r="40" fill="none" stroke-width="16"/>
+                @for (seg of donutSegments(); track seg.label) {
+                  <circle
+                    class="donut__seg"
+                    cx="50" cy="50" r="40"
+                    fill="none"
+                    stroke-width="16"
+                    [attr.stroke]="seg.color"
+                    [attr.stroke-dasharray]="seg.dashArray"
+                    [attr.stroke-dashoffset]="-seg.offset"
+                    stroke-linecap="round"
+                  />
+                }
+                <text x="50" y="48" text-anchor="middle" class="donut__center-value">{{ totalProps() }}</text>
+                <text x="50" y="58" text-anchor="middle" class="donut__center-label">total</text>
+              </svg>
+              <div class="donut-legend">
+                @for (seg of donutSegments(); track seg.label) {
+                  <div class="donut-legend__item">
+                    <span class="donut-legend__dot" [style.background]="seg.color"></span>
+                    <span class="donut-legend__label">{{ seg.label }}</span>
+                    <span class="donut-legend__value">{{ seg.value }} ({{ seg.pct }}%)</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Barras — Venta vs Alquiler -->
+          <div class="chart-card">
+            <h3 class="chart-card__title">Venta vs Alquiler</h3>
+            <div class="bar-chart">
+              @for (bar of barTipoData(); track bar.label) {
+                <div class="bar-item">
+                  <span class="bar-item__label">{{ bar.label }}</span>
+                  <div class="bar-item__track">
+                    <div class="bar-item__fill" [style.width.%]="bar.pct" [style.background]="bar.color">
+                      <span class="bar-item__val">{{ bar.value }}</span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Barras — Estado de propiedades -->
+          <div class="chart-card">
+            <h3 class="chart-card__title">Estado de propiedades</h3>
+            <div class="bar-chart">
+              @for (bar of barEstadoData(); track bar.label) {
+                <div class="bar-item">
+                  <span class="bar-item__label">{{ bar.label }}</span>
+                  <div class="bar-item__track">
+                    <div class="bar-item__fill" [style.width.%]="bar.pct" [style.background]="bar.color">
+                      <span class="bar-item__val">{{ bar.value }}</span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Tabla resumen extra -->
+        <div class="summary-row">
+          <div class="summary-card">
+            <span class="summary-card__label">Pendientes de aprobación</span>
+            <span class="summary-card__value summary-card__value--yellow">{{ m.propiedadesPendientes }}</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card__label">Rechazadas</span>
+            <span class="summary-card__value summary-card__value--red">{{ m.propiedadesRechazadas }}</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card__label">Vendidas / cerradas</span>
+            <span class="summary-card__value summary-card__value--purple">{{ m.propiedadesVendidas }}</span>
+          </div>
+          <div class="summary-card">
+            <span class="summary-card__label">En alquiler</span>
+            <span class="summary-card__value summary-card__value--orange">{{ m.propiedadesAlquiler }}</span>
+          </div>
+        </div>
+
       } @else {
         <p class="admin__loading">Cargando métricas...</p>
       }
     }
 
-    <!-- ── TAB: USUARIOS ── -->
+    <!-- ── TAB USUARIOS ──────────────────────────────────────────────────── -->
     @if (activeTab() === 'usuarios') {
       @if (loading()) {
         <p class="admin__loading">Cargando usuarios...</p>
@@ -75,14 +163,8 @@
           <table class="users-table">
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Correo</th>
-                <th>Teléfono</th>
-                <th>Rol</th>
-                <th>Props.</th>
-                <th>Estado</th>
-                <th>Acciones</th>
+                <th>ID</th><th>Nombre</th><th>Correo</th><th>Teléfono</th>
+                <th>Rol</th><th>Props.</th><th>Estado</th><th>Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -115,40 +197,33 @@
   </div>
 </div>
 
-<!-- Modal de edición de usuario -->
+<!-- Modal edición usuario -->
 @if (editingUser(); as user) {
   <div class="modal-overlay" (click)="closeEdit()">
     <div class="modal-box" (click)="$event.stopPropagation()">
       <h2 class="modal-box__title">Editar usuario — {{ user.nombre }}</h2>
-
       <form [formGroup]="editForm" (ngSubmit)="saveUser()" novalidate>
         <label class="field">
           <span class="field__label">Nombre</span>
           <input type="text" formControlName="nombre" class="field__input" [class.is-invalid]="shouldShowError('nombre')" />
           @if (shouldShowError('nombre')) { <small class="field__error">Mínimo 3 caracteres.</small> }
         </label>
-
         <label class="field">
           <span class="field__label">Correo electrónico</span>
           <input type="email" formControlName="correo" class="field__input" [class.is-invalid]="shouldShowError('correo')" />
           @if (shouldShowError('correo')) { <small class="field__error">Correo inválido.</small> }
         </label>
-
         <label class="field">
           <span class="field__label">Teléfono</span>
           <input type="tel" formControlName="telefono" class="field__input" placeholder="Solo números" />
         </label>
-
         <label class="field">
           <span class="field__label">Nueva contraseña <small>(dejar vacío para no cambiar)</small></span>
           <input type="password" formControlName="nuevaContrasena" class="field__input" placeholder="Mínimo 8 caracteres" />
         </label>
-
         <div class="modal-box__actions">
           <button type="button" class="btn btn--outline" (click)="closeEdit()">Cancelar</button>
-          <button type="submit" class="btn btn--primary" [disabled]="loading()">
-            {{ loading() ? 'Guardando...' : 'Guardar cambios' }}
-          </button>
+          <button type="submit" class="btn btn--primary" [disabled]="loading()">{{ loading() ? 'Guardando...' : 'Guardar cambios' }}</button>
         </div>
       </form>
     </div>

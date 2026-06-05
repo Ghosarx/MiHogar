@@ -85,7 +85,7 @@ public class PropertyService {
                 .precio(req.getPrecio()).ubicacion(req.getUbicacion())
                 .tipo(Property.TipoPropiedad.valueOf(req.getTipo()))
                 .habitaciones(req.getHabitaciones()).banos(req.getBanos()).metraje(req.getMetraje())
-                .status(Property.StatusPropiedad.ACTIVE)
+                .status(Property.StatusPropiedad.ACTIVO)
                 .tags(tags)
                 .build();
         return toDetail(propertyRepo.save(p));
@@ -167,7 +167,7 @@ public class PropertyService {
     }
 
     private static Specification<Property> notDeleted() { return (r,q,cb) -> cb.isNull(r.get("deletedAt")); }
-    private static Specification<Property> activeStatus() { return (r,q,cb) -> cb.equal(r.get("status"), Property.StatusPropiedad.ACTIVE); }
+    private static Specification<Property> activeStatus() { return (r,q,cb) -> cb.equal(r.get("status"), Property.StatusPropiedad.ACTIVO); }
     private static Specification<Property> tipoEq(String tipo) { return (r,q,cb) -> cb.equal(r.get("tipo"), Property.TipoPropiedad.valueOf(tipo)); }
     private static Specification<Property> precioGte(double min) { return (r,q,cb) -> cb.ge(r.get("precio"), min); }
     private static Specification<Property> precioLte(double max) { return (r,q,cb) -> cb.le(r.get("precio"), max); }

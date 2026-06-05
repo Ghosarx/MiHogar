@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "property_images", indexes = {
-    @Index(name = "idx_prop_orden", columnList = "property_id, orden")
+@Table(name = "imagenes_propiedad", indexes = {
+    @Index(name = "idx_prop_orden", columnList = "propiedad_id, orden")
 })
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class PropertyImage {
@@ -13,7 +13,7 @@ public class PropertyImage {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "property_id")
+    @JoinColumn(name = "propiedad_id")
     private Property property;
 
     @Column(nullable = false)

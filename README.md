@@ -1,6 +1,6 @@
 # MiHogar — Plataforma Inmobiliaria
 
-MiHogar es una plataforma web para la compra y alquiler de propiedades en Perú. Permite a los usuarios explorar el catálogo de propiedades, registrarse, publicar inmuebles y contactar agentes directamente por WhatsApp. Incluye un panel de administración con métricas y gestión de usuarios.
+MiHogar es una plataforma web para la compra y alquiler de propiedades en Perú. Permite a los usuarios explorar el catálogo, registrarse, publicar inmuebles con tags predefinidos, gestionar sus publicaciones y contactar agentes por WhatsApp. Incluye un panel de administración con dashboard de métricas y gestión de usuarios.
 
 ---
 
@@ -17,16 +17,16 @@ MiHogar/
 
 ## Requisitos Previos
 
-| Herramienta   | Versión mínima |
-|---------------|----------------|
-| Java          | 21             |
-| Eclipse IDE   | 2023-09+       |
+| Herramienta | Versión mínima |
+|---|---|
+| Java | 21 |
+| Eclipse IDE | 2023-09+ |
 | Spring Tools 4 (plugin Eclipse) | Última versión |
 | Lombok (plugin Eclipse) | 1.18+ |
-| Node.js       | 20+            |
-| Angular CLI   | 19+            |
-| MySQL         | 8.0+           |
-| MySQL Workbench | 8.0+         |
+| Node.js | 20+ |
+| Angular CLI | 19+ |
+| MySQL | 8.0+ |
+| MySQL Workbench | 8.0+ |
 
 ---
 
@@ -40,30 +40,23 @@ Abrir MySQL Workbench, conectarse al servidor local y ejecutar el script:
 BD/mihogar_schema.sql
 ```
 
-Esto crea la base de datos `mihogar`, las tablas, índices y los datos de prueba iniciales.
+El script elimina y recrea la base de datos desde cero, crea todas las tablas en español, inserta los tags predefinidos y los datos de prueba.
 
 ### 2. BackEnd con Eclipse IDE
 
-**Paso 1 — Instalar plugins necesarios en Eclipse**
+**Paso 1 — Instalar plugins en Eclipse**
 
 Ir a Help → Eclipse Marketplace e instalar:
 - Spring Tools 4 (aka Spring Tool Suite 4)
-- Lombok (descargar lombok.jar desde projectlombok.org e instalar apuntando al ejecutable de Eclipse)
+- Lombok: descargar lombok.jar desde projectlombok.org, ejecutar con `java -jar lombok.jar` y apuntar al ejecutable de Eclipse
 
 **Paso 2 — Importar el proyecto**
 
-Ir a File → Import → Maven → Existing Maven Projects.
-Seleccionar la carpeta `BackEnd/` y hacer clic en Finish.
-Eclipse descargará las dependencias automáticamente.
+Ir a File → Import → Maven → Existing Maven Projects, seleccionar la carpeta `BackEnd/` y hacer clic en Finish. Eclipse descargará las dependencias automáticamente.
 
 **Paso 3 — Configurar credenciales**
 
-Abrir el archivo:
-```
-BackEnd/src/main/resources/application.yml
-```
-
-Completar los valores marcados como pendientes:
+Abrir `BackEnd/src/main/resources/application.yml` y completar:
 
 ```yaml
 spring:
@@ -74,42 +67,35 @@ spring:
 app:
   cloudinary:
     cloud-name: TU_CLOUD_NAME
-    api-key: TU_API_KEY
+    api-key:    TU_API_KEY
     api-secret: TU_API_SECRET
 ```
 
-- Mailtrap: crear cuenta gratuita en mailtrap.io para pruebas de correo.
-- Cloudinary: crear cuenta gratuita en cloudinary.com para almacenamiento de imágenes.
+- Mailtrap: cuenta gratuita en mailtrap.io para pruebas de correo.
+- Cloudinary: cuenta gratuita en cloudinary.com para almacenamiento de imágenes.
 
 **Paso 4 — Ejecutar**
 
-Hacer clic derecho en el proyecto → Run As → Spring Boot App.
+Clic derecho en el proyecto → Run As → Spring Boot App.
 
-Verificar que la consola muestre:
-```
-Started MiHogarApplication in X seconds
-```
+Verificar en la consola: `Started MiHogarApplication in X seconds`
 
-El servidor queda disponible en: `http://localhost:8080`
-
-Documentación Swagger: `http://localhost:8080/swagger-ui.html`
+- API: `http://localhost:8080`
+- Swagger: `http://localhost:8080/swagger-ui.html`
 
 ### 3. FrontEnd
 
-Abrir una terminal en la carpeta `FrontEnd/` y ejecutar:
-
 ```bash
+cd FrontEnd
 npm install
 ng serve
 ```
 
-La aplicación queda disponible en: `http://localhost:4200`
+Aplicación disponible en: `http://localhost:4200`
 
 ---
 
 ## Orden de Arranque
-
-Para que el sistema funcione correctamente, los servicios deben iniciarse en este orden:
 
 1. MySQL (verificar que el servidor esté activo en Workbench)
 2. BackEnd desde Eclipse (Spring Boot App)
@@ -119,32 +105,38 @@ Para que el sistema funcione correctamente, los servicios deben iniciarse en est
 
 ## Usuarios de Prueba
 
-| Correo              | Contraseña | Rol    |
-|---------------------|------------|--------|
-| admin@mihogar.pe    | password   | Admin  |
-| carlos@mihogar.pe   | password   | Usuario |
-| maria@mihogar.pe    | password   | Usuario |
+| Correo | Contraseña | Rol |
+|---|---|---|
+| admin@mihogar.pe | password | Admin |
+| carlos@mihogar.pe | password | Usuario |
+| maria@mihogar.pe | password | Usuario |
 
-El usuario administrador tiene acceso al panel en `http://localhost:4200/admin`.
+Panel de administración: `http://localhost:4200/admin`
 
 ---
 
-## Tecnologías Utilizadas
+## Funcionalidades
 
-**FrontEnd**
-- Angular 19 con Signals
-- TypeScript 5.7
-- RxJS 7.8
+- Catálogo de propiedades en venta y alquiler con filtros
+- Modal de detalle con galería, amenidades y contacto por WhatsApp
+- Registro e inicio de sesión con JWT
+- Recuperación de contraseña por correo (código de 6 dígitos)
+- Publicar propiedades con tags predefinidos de la plataforma
+- Panel de usuario (Mi Panel) con propiedades publicadas, edición y eliminación
+- Panel de administración con dashboard de métricas y gráficas
+- Gestión de usuarios desde el panel admin
+- Subida de imágenes a Cloudinary
+- Modo oscuro/claro persistente (respeta preferencia del sistema)
 
-**BackEnd**
-- Spring Boot 3.2.5
-- Spring Security con JWT
-- Spring Data JPA con Hibernate
-- Lombok
-- Cloudinary SDK
+---
 
-**Base de Datos**
-- MySQL 8.0
+## Tecnologías
+
+**FrontEnd:** Angular 19, TypeScript 5.7, RxJS 7.8
+
+**BackEnd:** Spring Boot 3.2.5, Spring Security + JWT, Spring Data JPA, Lombok, Cloudinary SDK
+
+**Base de Datos:** MySQL 8.0
 
 ---
 

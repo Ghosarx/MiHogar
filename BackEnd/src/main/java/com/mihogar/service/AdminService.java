@@ -34,10 +34,10 @@ public class AdminService {
                 .totalPropiedades(propertyRepo.count())
                 .propiedadesVenta(propertyRepo.countByTipoAndDeletedAtIsNull(Property.TipoPropiedad.venta))
                 .propiedadesAlquiler(propertyRepo.countByTipoAndDeletedAtIsNull(Property.TipoPropiedad.alquiler))
-                .propiedadesPendientes(propertyRepo.countByStatusAndDeletedAtIsNull(Property.StatusPropiedad.PENDING))
-                .propiedadesActivas(propertyRepo.countByStatusAndDeletedAtIsNull(Property.StatusPropiedad.ACTIVE))
-                .propiedadesRechazadas(propertyRepo.countByStatusAndDeletedAtIsNull(Property.StatusPropiedad.REJECTED))
-                .propiedadesVendidas(propertyRepo.countByStatusAndDeletedAtIsNull(Property.StatusPropiedad.SOLD))
+                .propiedadesPendientes(propertyRepo.countByStatusAndDeletedAtIsNull(Property.StatusPropiedad.PENDIENTE))
+                .propiedadesActivas(propertyRepo.countByStatusAndDeletedAtIsNull(Property.StatusPropiedad.ACTIVO))
+                .propiedadesRechazadas(propertyRepo.countByStatusAndDeletedAtIsNull(Property.StatusPropiedad.RECHAZADO))
+                .propiedadesVendidas(propertyRepo.countByStatusAndDeletedAtIsNull(Property.StatusPropiedad.VENDIDO))
                 .totalContactClicks(clickRepo.countAll())
                 .build();
     }

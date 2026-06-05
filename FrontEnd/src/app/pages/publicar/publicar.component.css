@@ -428,12 +428,12 @@
 
 /* Tags / Amenidades */
 .publicar__tags-section { margin-bottom: 28px; }
-.publicar__tags-title { font-size: 16px; font-weight: 600; color: #1a1a2e; margin: 0 0 4px; }
-.publicar__tags-hint { font-size: 13px; color: #6b7280; margin: 0 0 16px; }
+.publicar__tags-title { font-size: 16px; font-weight: 600; color: var(--color-text); margin: 0 0 4px; }
+.publicar__tags-hint { font-size: 13px; color: var(--color-text-muted); margin: 0 0 16px; }
 .publicar__tag-group { margin-bottom: 16px; }
-.publicar__tag-category { font-size: 13px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .5px; margin: 0 0 8px; }
+.publicar__tag-category { font-size: 13px; font-weight: 600; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .5px; margin: 0 0 8px; }
 .publicar__tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
-.tag-btn { padding: 6px 14px; border: 1.5px solid #d1d5db; border-radius: 20px; background: #fff; color: #374151; font-size: 13px; cursor: pointer; transition: all .15s; }
-.tag-btn:hover { border-color: #0d9488; color: #0d9488; }
-.tag-btn.is-selected { background: #0d9488; border-color: #0d9488; color: #fff; }
-.publicar__tags-selected { font-size: 13px; color: #0d9488; margin: 12px 0 0; }
+.tag-btn { padding: 6px 14px; border: 1.5px solid #d1d5db; border-radius: 20px; background: var(--color-bg); color: var(--color-text); font-size: 13px; cursor: pointer; transition: all .15s; }
+.tag-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+.tag-btn.is-selected { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-bg); }
+.publicar__tags-selected { font-size: 13px; color: var(--color-primary); margin: 12px 0 0; }

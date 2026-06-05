@@ -7,7 +7,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "usuarios")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +19,7 @@ public class User {
     @Column(nullable = false, unique = true, length = 150)
     private String correo;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "contrasena", nullable = false)
     private String passwordHash;
 
     @Column(length = 20)
@@ -35,11 +35,11 @@ public class User {
     private Boolean activo = true;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "creado_en", updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
+    @Column(name = "actualizado_en")
     private LocalDateTime updatedAt;
 
     public enum Rol { USER, ADMIN }

@@ -1,26 +1,19 @@
-# 📐 Documentación Técnica — MiHogar
+# Documentación Técnica — MiHogar
 
 ## 1. Arquitectura del Sistema
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                    NAVEGADOR                         │
-│              Angular 19 (:4200)                      │
-│   Components → Services → HttpClient + JWT           │
-└─────────────────────┬───────────────────────────────┘
-                      │ HTTP REST + Bearer Token
-                      ▼
-┌─────────────────────────────────────────────────────┐
-│              Spring Boot 3 (:8080)                   │
-│  Controller → Service → Repository → JPA             │
-│  Spring Security (JWT) + BCrypt                      │
-└─────────────────────┬───────────────────────────────┘
-                      │ JPA / Hibernate
-                      ▼
-┌─────────────────────────────────────────────────────┐
-│              MySQL 8 (:3306)                         │
-│              Base de datos: mihogar                  │
-└─────────────────────────────────────────────────────┘
+Navegador (Angular 19 :4200)
+        |
+        | HTTP REST + Bearer JWT
+        v
+Spring Boot 3 (:8080)
+  Controller → Service → Repository → JPA
+  Spring Security + BCrypt
+        |
+        | JPA / Hibernate
+        v
+MySQL 8 (:3306) — base de datos: mihogar
 ```
 
 ---
@@ -30,25 +23,32 @@
 ```
 FrontEnd/src/app/
 ├── components/
-│   ├── navbar/                  → Barra de navegación con estado de sesión
-│   ├── footer/                  → Pie de página
-│   ├── property-card/           → Tarjeta de propiedad en el catálogo
-│   └── property-detail-modal/   → Modal con detalle completo + contacto
+│   ├── navbar/                       Barra de navegación con toggle modo oscuro
+│   ├── footer/                       Pie de página
+│   ├── property-card/                Tarjeta de propiedad en el catálogo
+│   └── property-detail-modal/        Modal de detalle con galería y contacto
 ├── pages/
-│   ├── home/                    → Página principal con buscador
-│   ├── catalogo/                → Listado con filtros (venta/alquiler)
-│   ├── publicar/                → Formulario para publicar propiedad
-│   └── registro/                → Login, registro y recuperación de contraseña
+│   ├── home/                         Página principal con buscador
+│   ├── catalogo/                     Listado con filtros
+│   ├── publicar/                     Formulario de publicación y edición con tags
+│   ├── mi-panel/                     Panel del usuario con sus propiedades
+│   ├── registro/                     Login, registro y recuperación de contraseña
+│   └── admin/                        Dashboard de métricas y gestión de usuarios
 ├── services/
-│   ├── auth.service.ts          → Login, registro, JWT, sesión
-│   ├── property.service.ts      → CRUD propiedades + filtros
-│   └── modal.service.ts         → Control del modal de detalle
+│   ├── auth.service.ts               Login, registro, JWT, sesión
+│   ├── property.service.ts           CRUD propiedades y filtros
+│   ├── modal.service.ts              Control del modal de detalle
+│   ├── tag.service.ts                Tags de la plataforma
+│   ├── user.service.ts               Panel del usuario
+│   ├── admin.service.ts              Métricas y gestión admin
+│   └── theme.service.ts              Modo oscuro/claro persistente
 ├── interceptors/
-│   └── jwt.interceptor.ts       → Añade Bearer token a cada request
+│   └── jwt.interceptor.ts            Añade Bearer token a cada request
 ├── guards/
-│   └── auth.guard.ts            → Protege rutas que requieren sesión
+│   ├── auth.guard.ts                 Protege rutas que requieren sesión
+│   └── admin.guard.ts                Solo para ADMIN
 └── models/
-    └── property.model.ts        → Interfaces TypeScript
+    └── property.model.ts             Interfaces TypeScript
 ```
 
 ---
@@ -58,177 +58,141 @@ FrontEnd/src/app/
 ```
 BackEnd/src/main/java/com/mihogar/
 ├── controller/
-│   ├── AuthController.java       → Endpoints de autenticación
-│   └── PropertyController.java   → Endpoints de propiedades
+│   ├── AuthController.java
+│   ├── PropertyController.java
+│   ├── TagController.java
+│   ├── UserController.java
+│   └── AdminController.java
 ├── service/
-│   ├── AuthService.java          → Lógica de negocio auth
-│   ├── PropertyService.java      → Lógica de negocio propiedades
-│   └── EmailService.java         → Envío de emails (Mailtrap)
+│   ├── AuthService.java
+│   ├── PropertyService.java
+│   ├── AdminService.java
+│   ├── CloudinaryService.java
+│   └── EmailService.java
 ├── entity/
-│   ├── User.java                 → Entidad usuario
-│   ├── Property.java             → Entidad propiedad
-│   ├── PropertyImage.java        → Imágenes de propiedad
-│   ├── PropertyAmenity.java      → Amenidades
-│   ├── PasswordResetToken.java   → Tokens de recuperación
-│   └── Favorite.java             → Favoritos
-├── repository/                   → Interfaces JPA
+│   ├── User.java            → tabla: usuarios
+│   ├── Property.java        → tabla: propiedades
+│   ├── PropertyImage.java   → tabla: imagenes_propiedad
+│   ├── Tag.java             → tabla: tags
+│   ├── PasswordResetToken.java → tabla: tokens_recuperacion
+│   ├── Favorite.java        → tabla: favoritos
+│   └── ContactClick.java   → tabla: clics_contacto
+├── repository/
 ├── dto/
-│   ├── request/                  → DTOs de entrada (validados)
-│   └── response/                 → DTOs de salida
+│   ├── request/
+│   └── response/
 ├── security/
-│   ├── JwtAuthenticationFilter.java
-│   └── CustomUserDetailsService.java
 ├── config/
-│   └── SecurityConfig.java       → CORS, JWT, permisos
-├── exception/                    → Excepciones y handler global
+├── exception/
 └── util/
-    └── JwtUtil.java              → Generación y validación JWT
 ```
 
 ---
 
 ## 4. Base de Datos
 
-### Diagrama de Tablas
+### Tablas
 
-```
-users
-├── id (PK)
-├── nombre
-├── correo (UNIQUE)
-├── password_hash
-├── telefono
-├── rol (USER / ADMIN)
-├── activo
-├── created_at
-└── updated_at
+| Tabla | Descripción |
+|---|---|
+| usuarios | Cuentas de usuario (USER / ADMIN) |
+| tokens_recuperacion | Códigos de recuperación de contraseña (6 dígitos, expiran en 15 min) |
+| propiedades | Inmuebles publicados con estado (PENDIENTE/ACTIVO/RECHAZADO/VENDIDO) |
+| imagenes_propiedad | URLs de imágenes alojadas en Cloudinary |
+| tags | 42 tags predefinidos en 6 categorías |
+| propiedad_tags | Relación ManyToMany propiedades — tags |
+| favoritos | Propiedades guardadas por usuario |
+| clics_contacto | Analytics de clicks al botón WhatsApp |
+| mensajes_contacto | Mensajes del formulario de contacto |
 
-properties
-├── id (PK)
-├── owner_id (FK → users)
-├── titulo
-├── descripcion
-├── precio
-├── ubicacion
-├── tipo (venta / alquiler)
-├── status (PENDING / ACTIVE / REJECTED / SOLD)
-├── habitaciones
-├── banos
-├── metraje_m2
-├── deleted_at
-├── created_at
-└── updated_at
+### Categorías de Tags
 
-property_images
-├── id (PK)
-├── property_id (FK → properties)
-├── url
-└── orden
-
-property_amenities
-├── id (PK)
-├── property_id (FK → properties)
-└── nombre
-
-favorites
-├── user_id (FK → users)
-└── property_id (FK → properties)
-
-password_reset_tokens
-├── id (PK)
-├── user_id (FK → users)
-├── codigo (6 dígitos)
-├── expires_at
-└── used
-
-contact_clicks
-├── id (PK)
-├── property_id (FK → properties)
-├── user_id (FK → users, nullable)
-├── ip
-└── clicked_at
-
-contact_messages
-├── id (PK)
-├── property_id (FK → properties)
-├── agent_id (FK → users)
-├── nombre, correo, telefono, mensaje
-├── leido
-└── created_at
-```
+| Categoría | Ejemplos |
+|---|---|
+| servicios | Wifi, Aire acondicionado, Lavandería |
+| seguridad | Seguridad 24h, Cámara de vigilancia |
+| espacios | Cochera, Jardín, Terraza, Balcón |
+| amenidades | Piscina, Gimnasio, Ascensor |
+| vistas | Vista al mar, Vista panorámica |
+| extras | Amoblado, Mascotas permitidas |
 
 ---
 
 ## 5. Endpoints API REST
 
-### Autenticación — `/api/auth`
+### Autenticación — `/api/auth` (público)
 
-| Método | Endpoint | Descripción | Auth |
-|---|---|---|---|
-| POST | `/api/auth/register` | Registrar usuario | No |
-| POST | `/api/auth/login` | Iniciar sesión | No |
-| POST | `/api/auth/forgot-password` | Solicitar código de recuperación | No |
-| POST | `/api/auth/verify-code` | Verificar código (devuelve resetToken) | No |
-| POST | `/api/auth/reset-password` | Cambiar contraseña | No |
-| POST | `/api/auth/logout` | Cerrar sesión (client-side) | Sí |
+| Método | Endpoint | Descripción |
+|---|---|---|
+| POST | `/api/auth/register` | Registrar usuario |
+| POST | `/api/auth/login` | Iniciar sesión |
+| POST | `/api/auth/forgot-password` | Solicitar código de recuperación |
+| POST | `/api/auth/verify-code` | Verificar código |
+| POST | `/api/auth/reset-password` | Nueva contraseña |
+| POST | `/api/auth/logout` | Cerrar sesión |
+
+### Tags — `/api/tags` (público)
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | `/api/tags` | Listar todos los tags por categoría |
 
 ### Propiedades — `/api/properties`
 
-| Método | Endpoint | Descripción | Auth |
+| Método | Endpoint | Auth | Descripción |
 |---|---|---|---|
-| GET | `/api/properties` | Listar propiedades con filtros | No |
-| GET | `/api/properties/{id}` | Detalle de propiedad | No |
-| POST | `/api/properties` | Publicar propiedad | Sí |
-| PUT | `/api/properties/{id}` | Editar propiedad | Sí (owner) |
-| DELETE | `/api/properties/{id}` | Eliminar propiedad (soft delete) | Sí (owner) |
-| GET | `/api/properties/mine` | Mis propiedades | Sí |
-| POST | `/api/properties/{id}/contact-click` | Registrar click WhatsApp | No |
+| GET | `/api/properties` | No | Catálogo con filtros |
+| GET | `/api/properties/{id}` | No | Detalle |
+| POST | `/api/properties` | Sí | Publicar |
+| PUT | `/api/properties/{id}` | Sí (owner) | Editar |
+| DELETE | `/api/properties/{id}` | Sí (owner) | Eliminar |
+| POST | `/api/properties/{id}/images` | Sí | Subir imágenes |
+| POST | `/api/properties/{id}/contact-click` | No | Registrar click |
 
-### Parámetros de filtro (GET /api/properties)
+### Panel usuario — `/api/user` (requiere sesión)
 
-| Parámetro | Tipo | Descripción |
+| Método | Endpoint | Descripción |
 |---|---|---|
-| tipo | string | `venta` o `alquiler` |
-| precioMin | number | Precio mínimo |
-| precioMax | number | Precio máximo |
-| habitaciones | number | Mínimo de habitaciones |
-| banos | number | Mínimo de baños |
-| ubicacion | string | Texto libre (búsqueda parcial) |
-| page | number | Página (default: 0) |
-| size | number | Tamaño (default: 12) |
+| GET | `/api/user/properties` | Mis propiedades |
+| GET | `/api/user/properties/{id}` | Detalle propio |
+
+### Admin — `/api/admin` (solo ADMIN)
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | `/api/admin/metrics` | Métricas del dashboard |
+| GET | `/api/admin/users` | Listar usuarios |
+| PUT | `/api/admin/users/{id}` | Editar usuario |
+| PATCH | `/api/admin/users/{id}/toggle-active` | Activar/desactivar |
+| PATCH | `/api/admin/properties/{id}/status` | Cambiar estado |
 
 ---
 
 ## 6. Seguridad
 
-- **Autenticación:** JWT (JSON Web Token)
-- **Access Token:** válido 1 hora
-- **Refresh Token:** válido 7 días
-- **Reset Token:** válido 5 minutos
-- **Contraseñas:** BCrypt con 10 rounds
-- **CORS:** habilitado solo para `http://localhost:4200`
-- **Rutas públicas:** catálogo, detalle, auth endpoints
-- **Rutas protegidas:** publicar, editar, eliminar, mis propiedades
+- JWT con HMAC-SHA256. Access token: 1h. Refresh token: 7d. Reset token: 5min.
+- Contraseñas con BCrypt 10 rounds.
+- CORS habilitado solo para `http://localhost:4200`.
 
 ---
 
-## 7. Variables de Configuración
+## 7. Modo Oscuro
 
-Archivo: `BackEnd/src/main/resources/application.yml`
+Variables CSS en `:root` (claro) y `[data-theme="dark"]` (oscuro). `ThemeService` aplica el atributo al elemento `html` y persiste en `localStorage`. Al primer uso respeta `prefers-color-scheme` del sistema operativo.
+
+---
+
+## 8. Variables de Configuración
 
 ```yaml
-spring.datasource.url: jdbc:mysql://localhost:3306/mihogar
+spring.datasource.url:      jdbc:mysql://localhost:3306/mihogar
 spring.datasource.username: mihogar_user
 spring.datasource.password: mihogar_pass
-
-app.jwt.secret: [clave secreta]
-app.jwt.expiration: 3600000        # 1 hora
-app.jwt.refresh-expiration: 604800000  # 7 días
-
-app.cors.allowed-origins: http://localhost:4200
-
-spring.mail.host: sandbox.smtp.mailtrap.io
-spring.mail.port: 587
-spring.mail.username: [tu usuario Mailtrap]
-spring.mail.password: [tu contraseña Mailtrap]
+app.jwt.expiration:         3600000
+app.cors.allowed-origins:   http://localhost:4200
+spring.mail.username:       [usuario Mailtrap]
+spring.mail.password:       [contraseña Mailtrap]
+app.cloudinary.cloud-name:  [cloud name]
+app.cloudinary.api-key:     [api key]
+app.cloudinary.api-secret:  [api secret]
 ```

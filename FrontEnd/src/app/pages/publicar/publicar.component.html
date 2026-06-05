@@ -163,6 +163,38 @@
             }
           </label>
 
+
+          <!-- Tags / Amenidades -->
+          <div class="publicar__tags-section">
+            <h3 class="publicar__tags-title">Amenidades y características</h3>
+            <p class="publicar__tags-hint">Selecciona los tags que mejor describen tu propiedad</p>
+
+            @for (entry of tagsByCategoria() | keyvalue; track entry.key) {
+              <div class="publicar__tag-group">
+                <h4 class="publicar__tag-category">{{ getCategoriaLabel(entry.key) }}</h4>
+                <div class="publicar__tag-list">
+                  @for (tag of entry.value; track tag.id) {
+                    <button
+                      type="button"
+                      class="tag-btn"
+                      [class.is-selected]="isTagSelected(tag.nombre)"
+                      (click)="toggleTag(tag.nombre)"
+                    >
+                      {{ tag.nombre }}
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+
+            @if (selectedTags().length > 0) {
+              <p class="publicar__tags-selected">
+                {{ selectedTags().length }} tag(s) seleccionado(s):
+                <strong>{{ selectedTags().join(', ') }}</strong>
+              </p>
+            }
+          </div>
+
           <!-- Drag & drop -->
           <div class="dropzone-wrap">
             <span class="field__label">Imágenes (opcional)</span>

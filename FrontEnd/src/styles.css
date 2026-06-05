@@ -110,3 +110,107 @@ select {
 @media (min-width: 768px) {
   .container { padding-inline: var(--space-6); }
 }
+
+/* ── Modo oscuro ─────────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --color-primary:       #2ec4d4;
+  --color-primary-hover: #26a8b6;
+  --color-surface:       #1e3a3d;
+  --color-accent:        #2a5558;
+  --color-support:       #7ecdd4;
+
+  --color-text:          #e8f4f5;
+  --color-text-muted:    #8fb8bc;
+  --color-bg:            #0f2225;
+  --color-bg-soft:       #132a2d;
+  --color-page:          #0a1a1c;
+  --color-border:        #1e3a3d;
+  --color-danger:        #ff6b6b;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] body {
+  color: var(--color-text);
+  background: var(--color-page);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background: var(--color-bg-soft);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] ::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Transición suave al cambiar tema */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 200ms;
+  transition-timing-function: ease;
+}
+
+/* ── Adaptaciones adicionales modo oscuro ──────────────────────────────────── */
+[data-theme="dark"] .prop-card,
+[data-theme="dark"] .modal,
+[data-theme="dark"] .modal-box,
+[data-theme="dark"] .modal-confirm,
+[data-theme="dark"] .users-table,
+[data-theme="dark"] .users-table th,
+[data-theme="dark"] .metric-card,
+[data-theme="dark"] .auth__card,
+[data-theme="dark"] .publicar__card,
+[data-theme="dark"] .filters {
+  background: var(--color-bg);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .users-table td,
+[data-theme="dark"] .users-table tr {
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .field__input {
+  background: var(--color-bg-soft);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .navbar {
+  background: var(--color-bg);
+  border-bottom-color: var(--color-border);
+}
+
+[data-theme="dark"] .footer {
+  background: var(--color-bg);
+  border-top-color: var(--color-border);
+}
+
+[data-theme="dark"] .catalogo__grid .prop-card {
+  background: var(--color-bg);
+}
+
+[data-theme="dark"] .dropzone {
+  background: var(--color-bg-soft);
+  border-color: var(--color-border);
+}
+
+[data-theme="dark"] .tag-btn {
+  background: var(--color-bg-soft);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+[data-theme="dark"] .tag-btn.is-selected {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}

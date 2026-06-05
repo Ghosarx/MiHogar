@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CommonModule, KeyValuePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PropertyService } from '../../services/property.service';
@@ -10,7 +11,7 @@ import { TipoPropiedad } from '../../models/property.model';
 @Component({
   selector: 'app-publicar',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './publicar.component.html',
   styleUrl: './publicar.component.css',
 })

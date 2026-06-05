@@ -10,19 +10,50 @@
       </span>
     </a>
 
-    <button type="button" class="navbar__toggle" [class.is-open]="menuOpen()" [attr.aria-expanded]="menuOpen()" aria-controls="navbar-menu" [attr.aria-label]="menuOpen() ? 'Cerrar menú' : 'Abrir menú'" (click)="toggleMenu()">
-      <span class="navbar__toggle-bar"></span>
-      <span class="navbar__toggle-bar"></span>
-      <span class="navbar__toggle-bar"></span>
-    </button>
+    <div class="navbar__right">
+      <!-- Botón modo oscuro/claro -->
+      <button
+        type="button"
+        class="theme-toggle"
+        [attr.aria-label]="themeService.isDark() ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+        [title]="themeService.isDark() ? 'Modo claro' : 'Modo oscuro'"
+        (click)="themeService.toggle()"
+      >
+        @if (themeService.isDark()) {
+          <!-- Sol -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        } @else {
+          <!-- Luna -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        }
+      </button>
+
+      <button type="button" class="navbar__toggle" [class.is-open]="menuOpen()" [attr.aria-expanded]="menuOpen()" aria-controls="navbar-menu" [attr.aria-label]="menuOpen() ? 'Cerrar menú' : 'Abrir menú'" (click)="toggleMenu()">
+        <span class="navbar__toggle-bar"></span>
+        <span class="navbar__toggle-bar"></span>
+        <span class="navbar__toggle-bar"></span>
+      </button>
+    </div>
 
     <nav id="navbar-menu" class="navbar__menu" [class.is-open]="menuOpen()" aria-label="Navegación principal">
       <a routerLink="/comprar"  routerLinkActive="is-active" class="navbar__link" (click)="closeMenu()">Comprar</a>
       <a routerLink="/alquilar" routerLinkActive="is-active" class="navbar__link" (click)="closeMenu()">Alquilar</a>
 
       @if (authService.isAuthenticated()) {
-        <a routerLink="/publicar" routerLinkActive="is-active" class="navbar__link" (click)="closeMenu()">Publicar Propiedad</a>
-        <a routerLink="/mi-panel" routerLinkActive="is-active" class="navbar__link" (click)="closeMenu()">Mi Panel</a>
+        <a routerLink="/publicar"  routerLinkActive="is-active" class="navbar__link" (click)="closeMenu()">Publicar Propiedad</a>
+        <a routerLink="/mi-panel"  routerLinkActive="is-active" class="navbar__link" (click)="closeMenu()">Mi Panel</a>
         @if (authService.isAdmin()) {
           <a routerLink="/admin" routerLinkActive="is-active" class="navbar__link navbar__link--admin" (click)="closeMenu()">Admin</a>
         }

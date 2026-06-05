@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AdminService, AdminMetrics, UserSummary } from '../../services/admin.service';
@@ -24,23 +24,60 @@ export class AdminComponent implements OnInit {
   readonly successMsg = signal<string | null>(null);
   readonly editingUser = signal<UserSummary | null>(null);
 
-  readonly editForm = this.fb.group({
-    nombre: ['', [Validators.required, Validators.minLength(3)]],
-    correo: ['', [Validators.required, Validators.email]],
-    telefono: ['', [Validators.pattern(/^[0-9]{6,15}$/)]],
-    nuevaContrasena: [''],
+  // ── Datos derivados para gráficas ──────────────────────────────────────────
+
+  readonly totalProps = computed(() => this.metrics()?.totalPropiedades ?? 0);
+
+  readonly barTipoData = computed(() => {
+    const m = this.metrics();
+    if (!m) return [];
+    const max = Math.max(m.propiedadesVenta, m.propiedadesAlquiler, 1);
+    return [
+      { label: 'Venta',    value: m.propiedadesVenta,    pct: Math.round(m.propiedadesVenta / max * 100),    color: '#2ec4d4' },
+      { label: 'Alquiler', value: m.propiedadesAlquiler, pct: Math.round(m.propiedadesAlquiler / max * 100), color: '#f97316' },
+    ];
   });
 
-  ngOnInit(): void {
-    this.loadMetrics();
-    this.loadUsers();
-  }
+  readonly barEstadoData = computed(() => {
+    const m = this.metrics();
+    if (!m) return [];
+    const max = Math.max(m.propiedadesActivas, m.propiedadesPendientes, m.propiedadesRechazadas, m.propiedadesVendidas, 1);
+    return [
+      { label: 'Activas',    value: m.propiedadesActivas,    pct: Math.round(m.propiedadesActivas    / max * 100), color: '#22c55e' },
+      { label: 'Pendientes', value: m.propiedadesPendientes, pct: Math.round(m.propiedadesPendientes / max * 100), color: '#eab308' },
+      { label: 'Rechazadas', value: m.propiedadesRechazadas, pct: Math.round(m.propiedadesRechazadas / max * 100), color: '#ef4444' },
+      { label: 'Vendidas',   value: m.propiedadesVendidas,   pct: Math.round(m.propiedadesVendidas   / max * 100), color: '#8b5cf6' },
+    ];
+  });
 
-  setTab(tab: Tab): void {
-    this.activeTab.set(tab);
-    this.successMsg.set(null);
-    this.errorMsg.set(null);
-  }
+  readonly donutSegments = computed(() => {
+    const m = this.metrics();
+    if (!m || m.totalPropiedades === 0) return [];
+    const total = m.totalPropiedades;
+    const items = [
+      { label: 'Venta',    value: m.propiedadesVenta,    color: '#2ec4d4' },
+      { label: 'Alquiler', value: m.propiedadesAlquiler, color: '#f97316' },
+    ];
+    let offset = 0;
+    return items.map(item => {
+      const pct = item.value / total;
+      const dashArray = `${pct * 251.2} ${251.2}`;
+      const segment = { ...item, dashArray, offset: offset * 251.2, pct: Math.round(pct * 100) };
+      offset += pct;
+      return segment;
+    });
+  });
+
+  readonly editForm = this.fb.group({
+    nombre:         ['', [Validators.required, Validators.minLength(3)]],
+    correo:         ['', [Validators.required, Validators.email]],
+    telefono:       ['', [Validators.pattern(/^[0-9]{6,15}$/)]],
+    nuevaContrasena:[''],
+  });
+
+  ngOnInit(): void { this.loadMetrics(); this.loadUsers(); }
+
+  setTab(tab: Tab): void { this.activeTab.set(tab); this.successMsg.set(null); this.errorMsg.set(null); }
 
   loadMetrics(): void {
     this.adminService.getMetrics().subscribe({
@@ -59,14 +96,8 @@ export class AdminComponent implements OnInit {
 
   openEdit(user: UserSummary): void {
     this.editingUser.set(user);
-    this.editForm.patchValue({
-      nombre: user.nombre,
-      correo: user.correo,
-      telefono: user.telefono ?? '',
-      nuevaContrasena: '',
-    });
-    this.successMsg.set(null);
-    this.errorMsg.set(null);
+    this.editForm.patchValue({ nombre: user.nombre, correo: user.correo, telefono: user.telefono ?? '', nuevaContrasena: '' });
+    this.successMsg.set(null); this.errorMsg.set(null);
   }
 
   closeEdit(): void { this.editingUser.set(null); }
@@ -79,7 +110,6 @@ export class AdminComponent implements OnInit {
     const v = this.editForm.getRawValue();
     const payload: any = { nombre: v.nombre, correo: v.correo, telefono: v.telefono };
     if (v.nuevaContrasena && v.nuevaContrasena.length >= 8) payload.nuevaContrasena = v.nuevaContrasena;
-
     this.adminService.updateUser(user.id, payload).subscribe({
       next: (updated) => {
         this.users.update(list => list.map(u => u.id === updated.id ? updated : u));
@@ -87,10 +117,7 @@ export class AdminComponent implements OnInit {
         this.successMsg.set(`Usuario ${updated.nombre} actualizado correctamente.`);
         this.closeEdit();
       },
-      error: (err) => {
-        this.loading.set(false);
-        this.errorMsg.set(err.error?.message ?? 'Error al actualizar usuario.');
-      }
+      error: (err) => { this.loading.set(false); this.errorMsg.set(err.error?.message ?? 'Error al actualizar usuario.'); }
     });
   }
 
@@ -100,7 +127,7 @@ export class AdminComponent implements OnInit {
         this.users.update(list => list.map(u => u.id === updated.id ? updated : u));
         this.successMsg.set(`Usuario ${updated.nombre} ${updated.activo ? 'activado' : 'desactivado'}.`);
       },
-      error: () => this.errorMsg.set('Error al cambiar estado del usuario.')
+      error: () => this.errorMsg.set('Error al cambiar estado.')
     });
   }
 

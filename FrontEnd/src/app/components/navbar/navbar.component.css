@@ -205,3 +205,34 @@
     padding-inline: var(--space-5);
   }
 }
+
+/* Botón modo oscuro/claro */
+.navbar__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--color-bg-soft);
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+  background: var(--color-surface);
+  transform: rotate(20deg);
+}
+
+.theme-toggle:active {
+  transform: scale(0.92);
+}

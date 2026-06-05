@@ -14,5 +14,5 @@ public class Tag {
     private String nombre;
 
     @Column(nullable = false, length = 40)
-    private String categoria; // "servicios", "seguridad", "espacios", "vistas", "extras"
+    private String categoria;
 }

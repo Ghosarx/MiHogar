@@ -1,147 +1,133 @@
-# 📖 Manual de Usuario — MiHogar
+# Manual de Usuario — MiHogar
 
-## ¿Qué es MiHogar?
+## Introducción
 
-MiHogar es una plataforma web donde puedes buscar, comprar o alquilar propiedades en Perú. También puedes publicar tus propias propiedades para venderlas o alquilarlas.
+MiHogar es una plataforma web para buscar, comprar y alquilar propiedades en Perú. También puedes publicar tus propias propiedades, gestionarlas desde tu panel personal y contactar agentes directamente por WhatsApp.
 
 ---
 
-## 1. Página Principal
+## 1. Modo Oscuro
 
-Al entrar a `http://localhost:4200` verás la página principal con un buscador.
+En la esquina superior derecha del menú hay un botón con un ícono de luna o sol. Al hacer clic alternas entre el modo claro y el modo oscuro. La preferencia se guarda automáticamente y se mantiene la próxima vez que entres a la página.
+
+---
+
+## 2. Página Principal
+
+Al entrar a `http://localhost:4200` verás la página principal con un buscador central.
 
 **Cómo buscar:**
-1. Selecciona si buscas para **Comprar** o **Alquilar**
-2. Escribe la **ubicación** (ej. Miraflores)
-3. Ingresa un **precio máximo** si lo deseas
-4. Haz clic en **Buscar**
+1. Selecciona si buscas para Comprar o Alquilar
+2. Escribe la ubicación (ej. Miraflores)
+3. Ingresa un precio máximo si lo deseas
+4. Haz clic en Buscar
 
 Serás redirigido al catálogo con los resultados filtrados.
 
 ---
 
-## 2. Catálogo de Propiedades
+## 3. Catálogo de Propiedades
 
-Accede desde el menú en **Comprar** o **Alquilar**.
+Accede desde el menú en Comprar o Alquilar.
 
-### Filtros disponibles
-En el panel izquierdo puedes filtrar por:
-- **Rango de precio** — mínimo y máximo
-- **Habitaciones** — cantidad mínima
-- **Baños** — cantidad mínima
-- **Ubicación** — búsqueda por texto
+**Filtros disponibles:**
+- Rango de precio — mínimo y máximo
+- Habitaciones — cantidad mínima
+- Baños — cantidad mínima
+- Ubicación — texto libre
 
-Los resultados se actualizan automáticamente al cambiar los filtros.
+Los resultados se actualizan automáticamente. Para limpiar filtros haz clic en Limpiar.
 
-Para limpiar todos los filtros haz clic en **Limpiar**.
+**Ver detalles de una propiedad:**
+Haz clic en Ver Detalles para abrir el modal con galería de imágenes, precio, características, descripción, tags/amenidades, botón de WhatsApp y formulario de contacto.
 
-### Ver detalles de una propiedad
-Haz clic en **Ver Detalles** en cualquier tarjeta para abrir el modal con:
-- Galería de imágenes
-- Precio, ubicación y características
-- Descripción completa
-- Amenidades
-- Botón de WhatsApp para contactar al agente
-- Formulario de contacto
-
-Para cerrar el modal haz clic en la **X** o fuera del modal, o presiona **Escape**.
+Para cerrar el modal haz clic en la X, fuera del modal o presiona Escape.
 
 ---
 
-## 3. Crear una Cuenta
+## 4. Crear una Cuenta
 
-1. Haz clic en **Registrarse** en el menú
-2. Completa el formulario:
-   - **Nombre completo**
-   - **Correo electrónico**
-   - **Contraseña** (mínimo 8 caracteres)
-   - **Teléfono** (solo números, entre 6 y 15 dígitos)
-3. Haz clic en **Crear cuenta**
-4. Serás redirigido automáticamente a la página principal
+1. Haz clic en Registrarse en el menú
+2. Completa el formulario: nombre, correo, contraseña (mínimo 8 caracteres) y teléfono
+3. Haz clic en Crear cuenta
 
 ---
 
-## 4. Iniciar Sesión
+## 5. Iniciar Sesión
 
-1. Haz clic en **Iniciar sesión** en el menú
-2. Ingresa tu **correo** y **contraseña**
-3. Haz clic en **Iniciar sesión**
+1. Haz clic en Iniciar sesión en el menú
+2. Ingresa correo y contraseña
+3. Haz clic en Iniciar sesión
 
-Una vez dentro, el menú mostrará tu nombre y el botón **Cerrar sesión**.
-
----
-
-## 5. Recuperar Contraseña
-
-Si olvidaste tu contraseña:
-
-1. En la pantalla de login haz clic en **¿Olvidaste tu contraseña?**
-2. **Paso 1:** Ingresa tu correo electrónico y haz clic en **Enviar código**
-3. **Paso 2:** Revisa tu correo y escribe el código de 6 dígitos recibido
-4. **Paso 3:** Ingresa tu nueva contraseña (mínimo 8 caracteres) y confírmala
-5. Haz clic en **Guardar contraseña**
-
-El código es válido por 15 minutos.
+El menú mostrará tu nombre y los enlaces Publicar Propiedad, Mi Panel y Cerrar sesión.
 
 ---
 
-## 6. Publicar una Propiedad
+## 6. Recuperar Contraseña
 
-> Debes estar **iniciado sesión** para publicar.
+1. En la pantalla de login haz clic en ¿Olvidaste tu contraseña?
+2. Ingresa tu correo y haz clic en Enviar código
+3. Revisa tu correo y escribe el código de 6 dígitos recibido
+4. Ingresa tu nueva contraseña y confírmala
+5. Haz clic en Guardar contraseña
 
-1. Haz clic en **Publicar Propiedad** en el menú
-2. Completa el formulario:
-   - **Tipo:** Venta o Alquiler
-   - **Título** (mínimo 5 caracteres)
-   - **Dirección**
-   - **Precio** (en USD para venta, en S/. para alquiler)
-   - **Habitaciones** y **Baños**
-   - **Metraje** en m²
-   - **Descripción** (mínimo 20 caracteres)
-   - **Imágenes** (opcional — arrastra o selecciona)
-3. Haz clic en **Publicar propiedad**
-
-La propiedad quedará en estado **PENDING** hasta que un administrador la apruebe.
+El código expira en 15 minutos.
 
 ---
 
-## 7. Contactar a un Agente
+## 7. Publicar una Propiedad
 
-Desde el modal de detalle de una propiedad tienes dos opciones:
+Solo disponible para usuarios con sesión iniciada.
 
-### Por WhatsApp
-Haz clic en el botón verde **Contactar por WhatsApp**. Se abrirá WhatsApp con un mensaje predefinido que incluye el nombre de la propiedad y el precio.
-
-### Por formulario
-Completa el formulario de contacto con:
-- Tu nombre
-- Tu correo
-- Tu teléfono
-- Tu mensaje
-
-Haz clic en **Enviar mensaje**. El agente recibirá tu consulta.
+1. Haz clic en Publicar Propiedad en el menú
+2. Selecciona el tipo: Venta o Alquiler
+3. Completa título, dirección, precio, habitaciones, baños, metraje y descripción
+4. Selecciona los tags que describen tu propiedad (servicios, seguridad, espacios, amenidades, vistas, extras)
+5. Sube imágenes arrastrando o seleccionando archivos (opcional)
+6. Haz clic en Publicar propiedad
 
 ---
 
-## 8. Cerrar Sesión
+## 8. Mi Panel
 
-Haz clic en **Cerrar sesión** en el menú superior derecho.
+Accede desde el menú en Mi Panel (requiere sesión).
+
+Verás todas tus propiedades publicadas con tabs para filtrar por tipo (todas, en venta, en alquiler).
+
+**Editar una propiedad:** haz clic en el botón Editar de la tarjeta. Se abre el formulario con los datos actuales. Modifica lo que necesites y haz clic en Guardar cambios.
+
+**Eliminar una propiedad:** haz clic en Eliminar. Aparece un modal de confirmación para evitar borrados accidentales.
 
 ---
 
-## 9. Preguntas Frecuentes
+## 9. Contactar a un Agente
 
-**¿Puedo ver propiedades sin registrarme?**
-Sí. El catálogo y el detalle de propiedades son públicos. Solo necesitas cuenta para publicar.
+Desde el modal de detalle de una propiedad:
 
-**¿Cuánto cuesta publicar una propiedad?**
-Actualmente es gratuito.
+**Por WhatsApp:** haz clic en el botón verde Contactar por WhatsApp. Se abrirá WhatsApp con un mensaje predefinido con el nombre y precio de la propiedad.
 
-**¿Cómo sé si mi propiedad fue aprobada?**
-La propiedad pasa de estado PENDING a ACTIVE cuando un administrador la revisa.
+**Por formulario:** completa nombre, correo, teléfono y mensaje, luego haz clic en Enviar mensaje.
 
-**¿Puedo editar o eliminar mi propiedad?**
-Sí, desde la sección **Mis propiedades** (próximamente en el menú).
+---
 
-**¿El código de recuperación no llegó?**
-Revisa tu carpeta de spam. El código expira en 15 minutos, puedes solicitar uno nuevo.
+## 10. Panel de Administración
+
+Solo accesible para usuarios con rol Admin en `http://localhost:4200/admin`.
+
+**Métricas:** dashboard con tarjetas KPI (usuarios, propiedades, activas, clicks), gráfica de dona con distribución por tipo, gráficas de barras por tipo y estado, y resumen de estados.
+
+**Usuarios:** tabla con todos los usuarios. Puedes editar nombre, correo, teléfono y contraseña de cualquier usuario, y activar o desactivar cuentas.
+
+---
+
+## 11. Preguntas Frecuentes
+
+**¿Puedo ver propiedades sin registrarme?** Sí. El catálogo es público.
+
+**¿Por qué no aparece el enlace Publicar Propiedad?** Debes iniciar sesión primero.
+
+**¿Cómo sé si mi propiedad fue aprobada?** En Mi Panel verás el estado de cada publicación.
+
+**¿Puedo subir imágenes al editar?** La subida de imágenes está disponible al crear. Para editar, actualiza los datos del formulario.
+
+**El código de recuperación no llegó.** Revisa tu carpeta de spam. Expira en 15 minutos y puedes solicitar uno nuevo.
