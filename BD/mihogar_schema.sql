@@ -95,18 +95,6 @@ CREATE TABLE IF NOT EXISTS property_images (
     INDEX idx_prop_orden (property_id, orden)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- ────────────────────────────────────────────────────────────────────────────
---  6. TABLA: property_amenities  (HU-012/015)
--- ────────────────────────────────────────────────────────────────────────────
-
-CREATE TABLE IF NOT EXISTS property_amenities (
-    id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    property_id BIGINT UNSIGNED NOT NULL,
-    nombre      VARCHAR(100)    NOT NULL,
-
-    CONSTRAINT fk_amen_property FOREIGN KEY (property_id)
-        REFERENCES properties(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ────────────────────────────────────────────────────────────────────────────
 --  7. TABLA: favorites  (HU-019, HU-020)
@@ -159,8 +147,86 @@ CREATE TABLE IF NOT EXISTS contact_messages (
     INDEX idx_cm_leido  (leido)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
+-- ────────────────────────────────────────────────────────────────────────────
+--  10. TABLA: tags  (amenidades/tags predefinidos de la plataforma)
+-- ────────────────────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS tags (
+    id        BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    nombre    VARCHAR(60)  NOT NULL,
+    categoria VARCHAR(40)  NOT NULL,
+    CONSTRAINT uq_tag_nombre UNIQUE (nombre)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ────────────────────────────────────────────────────────────────────────────
+--  6. TABLA: property_tags  (tabla pivote Property <-> Tag)
+-- ────────────────────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS property_tags (
+    property_id BIGINT UNSIGNED NOT NULL,
+    tag_id      BIGINT UNSIGNED NOT NULL,
+
+    PRIMARY KEY (property_id, tag_id),
+    CONSTRAINT fk_pt_property FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
+    CONSTRAINT fk_pt_tag      FOREIGN KEY (tag_id)      REFERENCES tags(id)       ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- INSERT de tags:
+INSERT IGNORE INTO tags (nombre, categoria) VALUES
+-- Servicios
+('Wifi',               'servicios'),
+('Agua caliente',      'servicios'),
+('Gas natural',        'servicios'),
+('Electricidad',       'servicios'),
+('Cable/TV',           'servicios'),
+('Lavandería',         'servicios'),
+('Aire acondicionado', 'servicios'),
+('Calefacción',        'servicios'),
+-- Seguridad
+('Seguridad 24h',      'seguridad'),
+('Cámara de vigilancia','seguridad'),
+('Puerta blindada',    'seguridad'),
+('Intercomunicador',   'seguridad'),
+('Vigilante',          'seguridad'),
+-- Espacios
+('Cochera',            'espacios'),
+('Cochera doble',      'espacios'),
+('Cochera triple',     'espacios'),
+('Jardín',             'espacios'),
+('Terraza',            'espacios'),
+('Balcón',             'espacios'),
+('Patio',              'espacios'),
+('Sótano',             'espacios'),
+('Cuarto de servicio', 'espacios'),
+('Depósito',           'espacios'),
+-- Amenidades del edificio
+('Piscina',            'amenidades'),
+('Gimnasio',           'amenidades'),
+('Sauna',              'amenidades'),
+('Zona BBQ',           'amenidades'),
+('Parrilla',           'amenidades'),
+('Salón de eventos',   'amenidades'),
+('Juegos infantiles',  'amenidades'),
+('Áreas comunes',      'amenidades'),
+('Ascensor',           'amenidades'),
+-- Vistas y entorno
+('Vista al mar',       'vistas'),
+('Vista panorámica',   'vistas'),
+('Vista a parque',     'vistas'),
+('Zona tranquila',     'vistas'),
+('Cerca del mar',      'vistas'),
+-- Extras
+('Amoblado',           'extras'),
+('Semi amoblado',      'extras'),
+('Mascotas permitidas','extras'),
+('Parque cercano',     'extras'),
+('Centro comercial cercano','extras'),
+('Colegio cercano',    'extras'),
+('Hospital cercano',   'extras');
+
 -- =============================================================================
---  10. DATOS SEMILLA (seed inicial para demo)
+--  11. DATOS SEMILLA (seed inicial para demo)
 -- =============================================================================
 
 -- Usuarios: admin, agente (owner), comprador
@@ -212,22 +278,11 @@ INSERT IGNORE INTO properties (owner_id, titulo, descripcion, precio, ubicacion,
  'Departamento moderno con vista al mar, perfecto para ejecutivos.',
  3500, 'Miraflores, Lima', 'alquiler', 'ACTIVE', 2, 2, 80);
 
--- Amenidades para las propiedades
-INSERT IGNORE INTO property_amenities (property_id, nombre) VALUES
-(1,'Cochera'),(1,'Gimnasio'),(1,'Piscina'),(1,'Vista al mar'),
-(2,'Piscina'),(2,'Terraza'),(2,'Parrilla'),(2,'Vista al mar'),(2,'Cochera doble'),
-(3,'Cochera'),(3,'Seguridad 24h'),(3,'Ascensor'),
-(4,'Jardín'),(4,'Cochera triple'),(4,'Zona BBQ'),(4,'Cuarto de servicio'),
-(5,'Ascensor'),(5,'Vigilancia'),
-(6,'Amoblado'),(6,'Wifi'),(6,'Lavandería'),
-(7,'Cochera'),(7,'Áreas comunes'),(7,'Parque cercano'),
-(8,'Terraza privada'),(8,'Piscina'),(8,'Gimnasio'),(8,'Cochera doble'),(8,'Vista panorámica'),
-(9,'Servicios incluidos'),(9,'Wifi'),
-(10,'Vista al mar'),(10,'Cochera'),(10,'Seguridad 24h');
+-- Las amenidades/tags se asignan via property_tags usando los IDs de la tabla tags
 
 
 -- =============================================================================
---  11. IMÁGENES DE PROPIEDADES (usando Unsplash para demo)
+--  12. IMÁGENES DE PROPIEDADES (usando Unsplash para demo)
 -- =============================================================================
 INSERT IGNORE INTO property_images (property_id, url, orden) VALUES
 -- Departamento moderno en Miraflores
@@ -257,6 +312,41 @@ INSERT IGNORE INTO property_images (property_id, url, orden) VALUES
 -- Departamento ejecutivo en Miraflores
 (10, 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800', 0),
 (10, 'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=800', 1);
+
+
+-- =============================================================================
+--  13. SEED: Asignar tags a propiedades de ejemplo
+-- =============================================================================
+
+INSERT IGNORE INTO property_tags (property_id, tag_id)
+SELECT 1, id FROM tags WHERE nombre IN ('Cochera','Gimnasio','Piscina','Vista al mar');
+
+INSERT IGNORE INTO property_tags (property_id, tag_id)
+SELECT 2, id FROM tags WHERE nombre IN ('Piscina','Terraza','Parrilla','Vista al mar','Cochera doble');
+
+INSERT IGNORE INTO property_tags (property_id, tag_id)
+SELECT 3, id FROM tags WHERE nombre IN ('Cochera','Seguridad 24h','Ascensor');
+
+INSERT IGNORE INTO property_tags (property_id, tag_id)
+SELECT 4, id FROM tags WHERE nombre IN ('Jardín','Cochera triple','Zona BBQ','Cuarto de servicio');
+
+INSERT IGNORE INTO property_tags (property_id, tag_id)
+SELECT 5, id FROM tags WHERE nombre IN ('Ascensor','Seguridad 24h');
+
+INSERT IGNORE INTO property_tags (property_id, tag_id)
+SELECT 6, id FROM tags WHERE nombre IN ('Amoblado','Wifi','Lavandería');
+
+INSERT IGNORE INTO property_tags (property_id, tag_id)
+SELECT 7, id FROM tags WHERE nombre IN ('Cochera','Áreas comunes','Parque cercano');
+
+INSERT IGNORE INTO property_tags (property_id, tag_id)
+SELECT 8, id FROM tags WHERE nombre IN ('Terraza','Piscina','Gimnasio','Cochera doble','Vista panorámica');
+
+INSERT IGNORE INTO property_tags (property_id, tag_id)
+SELECT 9, id FROM tags WHERE nombre IN ('Wifi');
+
+INSERT IGNORE INTO property_tags (property_id, tag_id)
+SELECT 10, id FROM tags WHERE nombre IN ('Vista al mar','Cochera','Seguridad 24h');
 
 -- =============================================================================
 --  FIN DEL SCRIPT

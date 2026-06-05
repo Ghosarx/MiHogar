@@ -1,8 +1,8 @@
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/mihogar?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Lima&characterEncoding=UTF-8
-    username: root
-    password: mysql
+    username: mihogar_user
+    password: mihogar_pass
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -22,8 +22,8 @@ spring:
   mail:
     host: smtp.mailtrap.io
     port: 587
-    username: 5cf92455eefe75
-    password: 81c613e01270f8
+    username: TU_MAILTRAP_USER       # Reemplaza con tu usuario de Mailtrap
+    password: TU_MAILTRAP_PASSWORD   # Reemplaza con tu contraseña de Mailtrap
     properties:
       mail:
         smtp:
@@ -41,9 +41,9 @@ server:
 
 app:
   cloudinary:
-    cloud-name: dpdlpmjx4
-    api-key: 374673891499658
-    api-secret: Q5E-8F3Z0HdJ71u8Htuui5dkggs
+    cloud-name: TU_CLOUD_NAME      # Reemplaza con tu Cloudinary cloud name
+    api-key: TU_API_KEY            # Reemplaza con tu Cloudinary API key
+    api-secret: TU_API_SECRET      # Reemplaza con tu Cloudinary API secret
   jwt:
     secret: mihogar-super-secret-key-development-2024-change-in-production
     expiration: 3600000          # 1 hora en ms

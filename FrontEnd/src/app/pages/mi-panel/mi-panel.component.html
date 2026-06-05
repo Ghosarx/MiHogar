@@ -1,0 +1,88 @@
+<div class="panel">
+  <div class="container panel__inner">
+    <header class="panel__header">
+      <div>
+        <h1 class="panel__title">Mi Panel</h1>
+        <p class="panel__subtitle">Bienvenido, {{ user()?.nombre }}</p>
+      </div>
+      <a routerLink="/publicar" class="btn btn--primary">+ Nueva propiedad</a>
+    </header>
+
+    @if (successMsg()) {
+      <div class="alert alert--success">{{ successMsg() }}</div>
+    }
+    @if (errorMsg()) {
+      <div class="alert alert--error">{{ errorMsg() }}</div>
+    }
+
+    <!-- Tabs -->
+    <nav class="panel__tabs">
+      <button type="button" class="panel__tab" [class.is-active]="tab() === 'todas'" (click)="setTab('todas')">
+        Todas
+      </button>
+      <button type="button" class="panel__tab" [class.is-active]="tab() === 'venta'" (click)="setTab('venta')">
+        En venta
+      </button>
+      <button type="button" class="panel__tab" [class.is-active]="tab() === 'alquiler'" (click)="setTab('alquiler')">
+        En alquiler
+      </button>
+    </nav>
+
+    @if (loading()) {
+      <div class="panel__empty">Cargando propiedades...</div>
+    } @else if (properties().length === 0) {
+      <div class="panel__empty">
+        <p>No tienes propiedades publicadas aún.</p>
+        <a routerLink="/publicar" class="btn btn--primary" style="margin-top:16px">Publicar primera propiedad</a>
+      </div>
+    } @else {
+      <div class="panel__grid">
+        @for (prop of properties(); track prop.id) {
+          <div class="prop-card">
+            <div class="prop-card__img">
+              @if (prop.imagenPrincipal) {
+                <img [src]="prop.imagenPrincipal" [alt]="prop.titulo" />
+              } @else {
+                <div class="prop-card__no-img">Sin imagen</div>
+              }
+              <span class="prop-card__tipo" [class.prop-card__tipo--alquiler]="prop.tipo === 'alquiler'">
+                {{ prop.tipo === 'venta' ? 'Venta' : 'Alquiler' }}
+              </span>
+            </div>
+            <div class="prop-card__body">
+              <h3 class="prop-card__titulo">{{ prop.titulo }}</h3>
+              <p class="prop-card__ubicacion">{{ prop.ubicacion }}</p>
+              <p class="prop-card__precio">{{ formatPrice(prop.precio, prop.tipo) }}</p>
+              <div class="prop-card__stats">
+                <span>{{ prop.habitaciones }} hab.</span>
+                <span>{{ prop.banos }} baños</span>
+                <span>{{ prop.metraje }} m²</span>
+              </div>
+              <div class="prop-card__footer">
+                <span class="badge" [class]="getStatusClass(prop.status)">{{ getStatusLabel(prop.status) }}</span>
+                <div class="prop-card__actions">
+                  <button type="button" class="btn btn--sm btn--outline" (click)="editProperty(prop.id)">Editar</button>
+                  <button type="button" class="btn btn--sm btn--danger" (click)="askDelete(prop.id)">Eliminar</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Modal confirmar eliminación -->
+@if (confirmDeleteId()) {
+  <div class="modal-overlay" (click)="cancelDelete()">
+    <div class="modal-confirm" (click)="$event.stopPropagation()">
+      <h3>¿Eliminar propiedad?</h3>
+      <p>Esta acción no se puede deshacer.</p>
+      <div class="modal-confirm__actions">
+        <button type="button" class="btn btn--outline" (click)="cancelDelete()">Cancelar</button>
+        <button type="button" class="btn btn--danger" (click)="confirmDelete()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+}

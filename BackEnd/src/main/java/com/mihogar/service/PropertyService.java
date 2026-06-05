@@ -7,6 +7,7 @@ import com.mihogar.entity.*;
 import com.mihogar.exception.ForbiddenException;
 import com.mihogar.exception.NotFoundException;
 import com.mihogar.repository.PropertyRepository;
+import com.mihogar.repository.TagRepository;
 import com.mihogar.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -25,6 +27,9 @@ public class PropertyService {
 
     private final PropertyRepository propertyRepo;
     private final UserRepository userRepo;
+    private final TagRepository tagRepo;
+
+    // ── Catálogo público ──────────────────────────────────────────────────────
 
     public Page<PropertySummaryDTO> list(String tipo, Double precioMin, Double precioMax,
                                           Integer habitaciones, Integer banos,
@@ -43,20 +48,46 @@ public class PropertyService {
         return toDetail(findActiveOrThrow(id));
     }
 
+    // ── Panel usuario ─────────────────────────────────────────────────────────
+
+    public Page<PropertySummaryDTO> mine(String correoOwner, String tipo, Pageable pageable) {
+        User owner = userRepo.findByCorreo(correoOwner).orElseThrow();
+        if (tipo != null && !tipo.isBlank()) {
+            return propertyRepo
+                    .findByOwnerIdAndTipoAndDeletedAtIsNull(owner.getId(),
+                            Property.TipoPropiedad.valueOf(tipo), pageable)
+                    .map(this::toSummary);
+        }
+        return propertyRepo.findByOwnerIdAndDeletedAtIsNull(owner.getId(), pageable).map(this::toSummary);
+    }
+
+    public Page<PropertySummaryDTO> mine(String correoOwner, Pageable pageable) {
+        return mine(correoOwner, null, pageable);
+    }
+
+    public PropertyDetailDTO getOwnedById(Long id, String correoOwner) {
+        Property p = propertyRepo.findById(id)
+                .filter(pr -> pr.getDeletedAt() == null)
+                .orElseThrow(() -> new NotFoundException("Propiedad no encontrada."));
+        if (!p.getOwner().getCorreo().equals(correoOwner))
+            throw new ForbiddenException("No tienes acceso a esta propiedad.");
+        return toDetail(p);
+    }
+
+    // ── CRUD ──────────────────────────────────────────────────────────────────
+
     @Transactional
     public PropertyDetailDTO create(PropertyRequest req, String correoOwner) {
         User owner = userRepo.findByCorreo(correoOwner).orElseThrow();
+        Set<Tag> tags = resolveTags(req.getAmenidades());
         Property p = Property.builder()
                 .owner(owner).titulo(req.getTitulo()).descripcion(req.getDescripcion())
                 .precio(req.getPrecio()).ubicacion(req.getUbicacion())
                 .tipo(Property.TipoPropiedad.valueOf(req.getTipo()))
                 .habitaciones(req.getHabitaciones()).banos(req.getBanos()).metraje(req.getMetraje())
-                .status(Property.StatusPropiedad.ACTIVE) // Auto-aprobar para demo
+                .status(Property.StatusPropiedad.ACTIVE)
+                .tags(tags)
                 .build();
-        if (req.getAmenidades() != null) {
-            req.getAmenidades().forEach(nombre ->
-                    p.getAmenidades().add(PropertyAmenity.builder().property(p).nombre(nombre).build()));
-        }
         return toDetail(propertyRepo.save(p));
     }
 
@@ -76,11 +107,8 @@ public class PropertyService {
         p.setPrecio(req.getPrecio()); p.setUbicacion(req.getUbicacion());
         p.setTipo(Property.TipoPropiedad.valueOf(req.getTipo()));
         p.setHabitaciones(req.getHabitaciones()); p.setBanos(req.getBanos()); p.setMetraje(req.getMetraje());
-        p.getAmenidades().clear();
-        if (req.getAmenidades() != null) {
-            req.getAmenidades().forEach(nombre ->
-                    p.getAmenidades().add(PropertyAmenity.builder().property(p).nombre(nombre).build()));
-        }
+        p.getTags().clear();
+        p.getTags().addAll(resolveTags(req.getAmenidades()));
         return toDetail(propertyRepo.save(p));
     }
 
@@ -91,9 +119,11 @@ public class PropertyService {
         propertyRepo.save(p);
     }
 
-    public Page<PropertySummaryDTO> mine(String correoOwner, Pageable pageable) {
-        User owner = userRepo.findByCorreo(correoOwner).orElseThrow();
-        return propertyRepo.findByOwnerIdAndDeletedAtIsNull(owner.getId(), pageable).map(this::toSummary);
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private Set<Tag> resolveTags(List<String> nombres) {
+        if (nombres == null || nombres.isEmpty()) return new java.util.HashSet<>();
+        return tagRepo.findByNombreIn(nombres);
     }
 
     private Property findActiveOrThrow(Long id) {
@@ -103,7 +133,9 @@ public class PropertyService {
     }
 
     private Property findOwnedOrThrow(Long id, String correoOwner) {
-        Property p = findActiveOrThrow(id);
+        Property p = propertyRepo.findById(id)
+                .filter(pr -> pr.getDeletedAt() == null)
+                .orElseThrow(() -> new NotFoundException("Propiedad no encontrada."));
         if (!p.getOwner().getCorreo().equals(correoOwner))
             throw new ForbiddenException("No eres el propietario de esta publicación.");
         return p;
@@ -120,12 +152,14 @@ public class PropertyService {
 
     private PropertyDetailDTO toDetail(Property p) {
         List<String> imgs = p.getImagenes().stream().map(PropertyImage::getUrl).toList();
-        List<String> amen = p.getAmenidades().stream().map(PropertyAmenity::getNombre).toList();
+        // Tags ordenados alfabéticamente
+        List<String> tagNames = p.getTags().stream()
+                .map(Tag::getNombre).sorted().toList();
         return PropertyDetailDTO.builder()
                 .id(p.getId()).titulo(p.getTitulo()).descripcion(p.getDescripcion())
                 .precio(p.getPrecio()).ubicacion(p.getUbicacion()).tipo(p.getTipo().name())
                 .status(p.getStatus().name()).habitaciones(p.getHabitaciones())
-                .banos(p.getBanos()).metraje(p.getMetraje()).imagenes(imgs).amenidades(amen)
+                .banos(p.getBanos()).metraje(p.getMetraje()).imagenes(imgs).amenidades(tagNames)
                 .owner(PropertyDetailDTO.OwnerDTO.builder()
                         .id(p.getOwner().getId()).nombre(p.getOwner().getNombre())
                         .telefono(p.getOwner().getTelefono()).build())

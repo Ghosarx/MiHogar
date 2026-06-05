@@ -4,10 +4,13 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "properties", indexes = {
@@ -17,6 +20,7 @@ import java.util.List;
 })
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class Property {
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -55,9 +59,15 @@ public class Property {
     @Builder.Default
     private List<PropertyImage> imagenes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    /** Relación ManyToMany con Tag a través de la tabla property_tags */
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "property_tags",
+        joinColumns = @JoinColumn(name = "property_id"),
+        inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
     @Builder.Default
-    private List<PropertyAmenity> amenidades = new ArrayList<>();
+    private Set<Tag> tags = new HashSet<>();
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;

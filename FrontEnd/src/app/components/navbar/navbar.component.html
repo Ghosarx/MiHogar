@@ -19,13 +19,14 @@
     <nav id="navbar-menu" class="navbar__menu" [class.is-open]="menuOpen()" aria-label="Navegación principal">
       <a routerLink="/comprar"  routerLinkActive="is-active" class="navbar__link" (click)="closeMenu()">Comprar</a>
       <a routerLink="/alquilar" routerLinkActive="is-active" class="navbar__link" (click)="closeMenu()">Alquilar</a>
-      <a routerLink="/publicar" routerLinkActive="is-active" class="navbar__link" (click)="closeMenu()">Publicar Propiedad</a>
 
       @if (authService.isAuthenticated()) {
+        <a routerLink="/publicar" routerLinkActive="is-active" class="navbar__link" (click)="closeMenu()">Publicar Propiedad</a>
+        <a routerLink="/mi-panel" routerLinkActive="is-active" class="navbar__link" (click)="closeMenu()">Mi Panel</a>
         @if (authService.isAdmin()) {
-          <a routerLink="/admin" routerLinkActive="is-active" class="navbar__link navbar__link--admin" (click)="closeMenu()">⚙ Admin</a>
+          <a routerLink="/admin" routerLinkActive="is-active" class="navbar__link navbar__link--admin" (click)="closeMenu()">Admin</a>
         }
-        <span class="navbar__link">Hola, {{ authService.user()?.nombre }}</span>
+        <span class="navbar__user">{{ authService.user()?.nombre }}</span>
         <button type="button" class="navbar__link navbar__link--ghost" (click)="logout()">Cerrar sesión</button>
       } @else {
         <a routerLink="/login"    routerLinkActive="is-active" class="navbar__link navbar__link--ghost" (click)="closeMenu()">Iniciar sesión</a>

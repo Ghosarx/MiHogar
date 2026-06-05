@@ -27,6 +27,18 @@ export const routes: Routes = [
     title: 'Publicar propiedad — MiHogar'
   },
   {
+    path: 'publicar/editar/:id',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/publicar/publicar.component').then(m => m.PublicarComponent),
+    title: 'Editar propiedad — MiHogar'
+  },
+  {
+    path: 'mi-panel',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/mi-panel/mi-panel.component').then(m => m.MiPanelComponent),
+    title: 'Mi Panel — MiHogar'
+  },
+  {
     path: 'login',
     loadComponent: () => import('./pages/registro/registro.component').then(m => m.RegistroComponent),
     data: { initialMode: 'login' },

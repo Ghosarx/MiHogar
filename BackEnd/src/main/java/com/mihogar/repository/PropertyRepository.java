@@ -10,6 +10,7 @@ public interface PropertyRepository
         extends JpaRepository<Property, Long>, JpaSpecificationExecutor<Property> {
 
     Page<Property> findByOwnerIdAndDeletedAtIsNull(Long ownerId, Pageable pageable);
+    Page<Property> findByOwnerIdAndTipoAndDeletedAtIsNull(Long ownerId, Property.TipoPropiedad tipo, Pageable pageable);
     long countByOwnerIdAndDeletedAtIsNull(Long ownerId);
     long countByTipoAndDeletedAtIsNull(Property.TipoPropiedad tipo);
     long countByStatusAndDeletedAtIsNull(Property.StatusPropiedad status);

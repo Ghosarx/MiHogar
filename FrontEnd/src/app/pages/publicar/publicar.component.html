@@ -7,7 +7,7 @@
             <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
             <path d="M8 12.5l3 3 5-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <h2 class="publicar__success-title">¡Propiedad publicada!</h2>
+          <h2 class="publicar__success-title">{{ isEditMode() ? "¡Propiedad actualizada!" : "¡Propiedad publicada!" }}</h2>
           <p class="publicar__success-text">
             "{{ success.titulo }}" ya está disponible en el catálogo de
             <strong>{{ success.tipo === 'venta' ? 'venta' : 'alquiler' }}</strong>.
@@ -16,16 +16,21 @@
             <button type="button" class="btn btn--primary" (click)="goToCatalogo()">
               Ver en catálogo
             </button>
-            <button type="button" class="btn btn--outline" (click)="publishAnother()">
-              Publicar otra
+            <button type="button" class="btn btn--outline" (click)="goToPanel()">
+              Ir a mi panel
             </button>
+            @if (!isEditMode()) {
+              <button type="button" class="btn btn--ghost" (click)="publishAnother()">
+                Publicar otra
+              </button>
+            }
           </div>
         </div>
       } @else {
         <header class="publicar__header">
-          <h1 class="publicar__title">Publicar propiedad</h1>
+          <h1 class="publicar__title">{{ isEditMode() ? "Editar propiedad" : "Publicar propiedad" }}</h1>
           <p class="publicar__subtitle">
-            Comparte tu propiedad con miles de personas buscando un hogar.
+            {{ isEditMode() ? "Actualiza los datos de tu propiedad." : "Comparte tu propiedad con miles de personas buscando un hogar." }}
           </p>
         </header>
 
@@ -230,7 +235,7 @@
             </div>
           }
           <button type="submit" class="btn btn--primary publicar__submit" [disabled]="loading()">
-            {{ loading() ? 'Publicando...' : 'Publicar propiedad' }}
+            {{ loading() ? 'Guardando...' : (isEditMode() ? 'Guardar cambios' : 'Publicar propiedad') }}
           </button>
         </form>
       }
