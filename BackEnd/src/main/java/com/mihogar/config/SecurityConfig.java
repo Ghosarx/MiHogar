@@ -40,15 +40,11 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Swagger
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/api-docs/**").permitAll()
-                        // Auth pública
                         .requestMatchers("/api/auth/**").permitAll()
-                        // Catálogo público
                         .requestMatchers(HttpMethod.GET, "/api/properties", "/api/properties/{id}").permitAll()
-                        // Tracking click (fire-and-forget público)
                         .requestMatchers(HttpMethod.POST, "/api/properties/*/contact-click").permitAll()
-                        // Todo lo demás requiere auth
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
@@ -68,9 +64,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    public PasswordEncoder passwordEncoder() { return new BCryptPasswordEncoder(); }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {

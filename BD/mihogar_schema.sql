@@ -164,11 +164,11 @@ CREATE TABLE IF NOT EXISTS contact_messages (
 -- =============================================================================
 
 -- Usuarios: admin, agente (owner), comprador
--- Contraseñas: todas son "Demo1234" — hash BCrypt rounds=10
+-- Contraseñas: todas son "password" — hash BCrypt rounds=10
 INSERT IGNORE INTO users (nombre, correo, password_hash, telefono, rol) VALUES
-('Admin MiHogar',  'admin@mihogar.pe',   '$2a$10$QwErtYuiOpAsdfGhJklZxcVBnm1234567890abcdEFGHIJKLMNOPQ', '999000001', 'ADMIN'),
-('Carlos Mendoza', 'carlos@mihogar.pe',  '$2a$10$QwErtYuiOpAsdfGhJklZxcVBnm1234567890abcdEFGHIJKLMNOPQ', '987654321', 'USER'),
-('María López',    'maria@mihogar.pe',   '$2a$10$QwErtYuiOpAsdfGhJklZxcVBnm1234567890abcdEFGHIJKLMNOPQ', '998765432', 'USER');
+('Admin MiHogar',  'admin@mihogar.pe',   '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '999000001', 'ADMIN'),
+('Carlos Mendoza', 'carlos@mihogar.pe',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '987654321', 'USER'),
+('María López',    'maria@mihogar.pe',   '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '998765432', 'USER');
 
 -- Propiedades (owner = Carlos, id=2)
 INSERT IGNORE INTO properties (owner_id, titulo, descripcion, precio, ubicacion, tipo, status, habitaciones, banos, metraje_m2) VALUES
@@ -225,6 +225,40 @@ INSERT IGNORE INTO property_amenities (property_id, nombre) VALUES
 (9,'Servicios incluidos'),(9,'Wifi'),
 (10,'Vista al mar'),(10,'Cochera'),(10,'Seguridad 24h');
 
+
+-- =============================================================================
+--  11. IMÁGENES DE PROPIEDADES (usando Unsplash para demo)
+-- =============================================================================
+INSERT IGNORE INTO property_images (property_id, url, orden) VALUES
+-- Departamento moderno en Miraflores
+(1, 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800', 0),
+(1, 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800', 1),
+-- Casa de playa en Asia
+(2, 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800', 0),
+(2, 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800', 1),
+-- Loft en San Isidro
+(3, 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=800', 0),
+(3, 'https://images.unsplash.com/photo-1554995207-c18c203602cb?w=800', 1),
+-- Casa amplia en La Molina
+(4, 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800', 0),
+(4, 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=800', 1),
+-- Departamento en Jesús María
+(5, 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=800', 0),
+-- Estudio amoblado en Barranco
+(6, 'https://images.unsplash.com/photo-1630699144867-37acec97df5a?w=800', 0),
+-- Departamento familiar en Surco
+(7, 'https://images.unsplash.com/photo-1574362848149-11496d93a7c7?w=800', 0),
+(7, 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800', 1),
+-- Penthouse en San Borja
+(8, 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800', 0),
+(8, 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800', 1),
+-- Habitación en San Miguel
+(9, 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800', 0),
+-- Departamento ejecutivo en Miraflores
+(10, 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=800', 0),
+(10, 'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?w=800', 1);
+
 -- =============================================================================
 --  FIN DEL SCRIPT
 -- =============================================================================
+

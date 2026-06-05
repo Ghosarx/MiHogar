@@ -22,10 +22,13 @@
       <a routerLink="/publicar" routerLinkActive="is-active" class="navbar__link" (click)="closeMenu()">Publicar Propiedad</a>
 
       @if (authService.isAuthenticated()) {
+        @if (authService.isAdmin()) {
+          <a routerLink="/admin" routerLinkActive="is-active" class="navbar__link navbar__link--admin" (click)="closeMenu()">⚙ Admin</a>
+        }
         <span class="navbar__link">Hola, {{ authService.user()?.nombre }}</span>
         <button type="button" class="navbar__link navbar__link--ghost" (click)="logout()">Cerrar sesión</button>
       } @else {
-        <a routerLink="/login"   routerLinkActive="is-active" class="navbar__link navbar__link--ghost" (click)="closeMenu()">Iniciar sesión</a>
+        <a routerLink="/login"    routerLinkActive="is-active" class="navbar__link navbar__link--ghost" (click)="closeMenu()">Iniciar sesión</a>
         <a routerLink="/registro" routerLinkActive="is-active" class="navbar__link navbar__link--cta"   (click)="closeMenu()">Registrarse</a>
       }
     </nav>

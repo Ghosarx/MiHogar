@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 @RequiredArgsConstructor
@@ -28,18 +29,13 @@ public class PropertyService {
     public Page<PropertySummaryDTO> list(String tipo, Double precioMin, Double precioMax,
                                           Integer habitaciones, Integer banos,
                                           String ubicacion, Pageable pageable) {
-        Specification<Property> spec = Specification
-                .where(notDeleted())
-                .and(activeStatus());
-
+        Specification<Property> spec = Specification.where(notDeleted()).and(activeStatus());
         if (tipo != null)         spec = spec.and(tipoEq(tipo));
         if (precioMin != null)    spec = spec.and(precioGte(precioMin));
         if (precioMax != null)    spec = spec.and(precioLte(precioMax));
         if (habitaciones != null) spec = spec.and(habitacionesGte(habitaciones));
         if (banos != null)        spec = spec.and(banosGte(banos));
-        if (ubicacion != null && !ubicacion.isBlank())
-                                  spec = spec.and(ubicacionLike(ubicacion));
-
+        if (ubicacion != null && !ubicacion.isBlank()) spec = spec.and(ubicacionLike(ubicacion));
         return propertyRepo.findAll(spec, pageable).map(this::toSummary);
     }
 
@@ -51,42 +47,39 @@ public class PropertyService {
     public PropertyDetailDTO create(PropertyRequest req, String correoOwner) {
         User owner = userRepo.findByCorreo(correoOwner).orElseThrow();
         Property p = Property.builder()
-                .owner(owner)
-                .titulo(req.getTitulo())
-                .descripcion(req.getDescripcion())
-                .precio(req.getPrecio())
-                .ubicacion(req.getUbicacion())
+                .owner(owner).titulo(req.getTitulo()).descripcion(req.getDescripcion())
+                .precio(req.getPrecio()).ubicacion(req.getUbicacion())
                 .tipo(Property.TipoPropiedad.valueOf(req.getTipo()))
-                .habitaciones(req.getHabitaciones())
-                .banos(req.getBanos())
-                .metraje(req.getMetraje())
+                .habitaciones(req.getHabitaciones()).banos(req.getBanos()).metraje(req.getMetraje())
+                .status(Property.StatusPropiedad.ACTIVE) // Auto-aprobar para demo
                 .build();
-
         if (req.getAmenidades() != null) {
             req.getAmenidades().forEach(nombre ->
-                    p.getAmenidades().add(
-                            PropertyAmenity.builder().property(p).nombre(nombre).build()));
+                    p.getAmenidades().add(PropertyAmenity.builder().property(p).nombre(nombre).build()));
         }
         return toDetail(propertyRepo.save(p));
     }
 
     @Transactional
+    public void addImages(Long propertyId, List<String> urls, String correoOwner) {
+        Property p = findOwnedOrThrow(propertyId, correoOwner);
+        AtomicInteger orden = new AtomicInteger(p.getImagenes().size());
+        urls.forEach(url ->
+                p.getImagenes().add(PropertyImage.builder().property(p).url(url).orden(orden.getAndIncrement()).build()));
+        propertyRepo.save(p);
+    }
+
+    @Transactional
     public PropertyDetailDTO update(Long id, PropertyRequest req, String correoOwner) {
         Property p = findOwnedOrThrow(id, correoOwner);
-        p.setTitulo(req.getTitulo());
-        p.setDescripcion(req.getDescripcion());
-        p.setPrecio(req.getPrecio());
-        p.setUbicacion(req.getUbicacion());
+        p.setTitulo(req.getTitulo()); p.setDescripcion(req.getDescripcion());
+        p.setPrecio(req.getPrecio()); p.setUbicacion(req.getUbicacion());
         p.setTipo(Property.TipoPropiedad.valueOf(req.getTipo()));
-        p.setHabitaciones(req.getHabitaciones());
-        p.setBanos(req.getBanos());
-        p.setMetraje(req.getMetraje());
-
+        p.setHabitaciones(req.getHabitaciones()); p.setBanos(req.getBanos()); p.setMetraje(req.getMetraje());
         p.getAmenidades().clear();
         if (req.getAmenidades() != null) {
             req.getAmenidades().forEach(nombre ->
-                    p.getAmenidades().add(
-                            PropertyAmenity.builder().property(p).nombre(nombre).build()));
+                    p.getAmenidades().add(PropertyAmenity.builder().property(p).nombre(nombre).build()));
         }
         return toDetail(propertyRepo.save(p));
     }
@@ -100,8 +93,7 @@ public class PropertyService {
 
     public Page<PropertySummaryDTO> mine(String correoOwner, Pageable pageable) {
         User owner = userRepo.findByCorreo(correoOwner).orElseThrow();
-        return propertyRepo.findByOwnerIdAndDeletedAtIsNull(owner.getId(), pageable)
-                .map(this::toSummary);
+        return propertyRepo.findByOwnerIdAndDeletedAtIsNull(owner.getId(), pageable).map(this::toSummary);
     }
 
     private Property findActiveOrThrow(Long id) {
@@ -112,9 +104,8 @@ public class PropertyService {
 
     private Property findOwnedOrThrow(Long id, String correoOwner) {
         Property p = findActiveOrThrow(id);
-        if (!p.getOwner().getCorreo().equals(correoOwner)) {
+        if (!p.getOwner().getCorreo().equals(correoOwner))
             throw new ForbiddenException("No eres el propietario de esta publicación.");
-        }
         return p;
     }
 
@@ -122,10 +113,9 @@ public class PropertyService {
         String imagen = p.getImagenes().isEmpty() ? null : p.getImagenes().get(0).getUrl();
         return PropertySummaryDTO.builder()
                 .id(p.getId()).titulo(p.getTitulo()).precio(p.getPrecio())
-                .ubicacion(p.getUbicacion()).tipo(p.getTipo().name())
-                .status(p.getStatus().name()).habitaciones(p.getHabitaciones())
-                .banos(p.getBanos()).metraje(p.getMetraje()).imagenPrincipal(imagen)
-                .build();
+                .ubicacion(p.getUbicacion()).tipo(p.getTipo().name()).status(p.getStatus().name())
+                .habitaciones(p.getHabitaciones()).banos(p.getBanos()).metraje(p.getMetraje())
+                .imagenPrincipal(imagen).build();
     }
 
     private PropertyDetailDTO toDetail(Property p) {
@@ -135,38 +125,19 @@ public class PropertyService {
                 .id(p.getId()).titulo(p.getTitulo()).descripcion(p.getDescripcion())
                 .precio(p.getPrecio()).ubicacion(p.getUbicacion()).tipo(p.getTipo().name())
                 .status(p.getStatus().name()).habitaciones(p.getHabitaciones())
-                .banos(p.getBanos()).metraje(p.getMetraje())
-                .imagenes(imgs).amenidades(amen)
+                .banos(p.getBanos()).metraje(p.getMetraje()).imagenes(imgs).amenidades(amen)
                 .owner(PropertyDetailDTO.OwnerDTO.builder()
-                        .id(p.getOwner().getId())
-                        .nombre(p.getOwner().getNombre())
-                        .telefono(p.getOwner().getTelefono())
-                        .build())
+                        .id(p.getOwner().getId()).nombre(p.getOwner().getNombre())
+                        .telefono(p.getOwner().getTelefono()).build())
                 .build();
     }
 
-    private static Specification<Property> notDeleted() {
-        return (r, q, cb) -> cb.isNull(r.get("deletedAt"));
-    }
-    private static Specification<Property> activeStatus() {
-        return (r, q, cb) -> cb.equal(r.get("status"), Property.StatusPropiedad.ACTIVE);
-    }
-    private static Specification<Property> tipoEq(String tipo) {
-        return (r, q, cb) -> cb.equal(r.get("tipo"), Property.TipoPropiedad.valueOf(tipo));
-    }
-    private static Specification<Property> precioGte(double min) {
-        return (r, q, cb) -> cb.ge(r.get("precio"), min);
-    }
-    private static Specification<Property> precioLte(double max) {
-        return (r, q, cb) -> cb.le(r.get("precio"), max);
-    }
-    private static Specification<Property> habitacionesGte(int n) {
-        return (r, q, cb) -> cb.ge(r.get("habitaciones"), n);
-    }
-    private static Specification<Property> banosGte(int n) {
-        return (r, q, cb) -> cb.ge(r.get("banos"), n);
-    }
-    private static Specification<Property> ubicacionLike(String q) {
-        return (r, qb, cb) -> cb.like(cb.lower(r.get("ubicacion")), "%" + q.toLowerCase() + "%");
-    }
+    private static Specification<Property> notDeleted() { return (r,q,cb) -> cb.isNull(r.get("deletedAt")); }
+    private static Specification<Property> activeStatus() { return (r,q,cb) -> cb.equal(r.get("status"), Property.StatusPropiedad.ACTIVE); }
+    private static Specification<Property> tipoEq(String tipo) { return (r,q,cb) -> cb.equal(r.get("tipo"), Property.TipoPropiedad.valueOf(tipo)); }
+    private static Specification<Property> precioGte(double min) { return (r,q,cb) -> cb.ge(r.get("precio"), min); }
+    private static Specification<Property> precioLte(double max) { return (r,q,cb) -> cb.le(r.get("precio"), max); }
+    private static Specification<Property> habitacionesGte(int n) { return (r,q,cb) -> cb.ge(r.get("habitaciones"), n); }
+    private static Specification<Property> banosGte(int n) { return (r,q,cb) -> cb.ge(r.get("banos"), n); }
+    private static Specification<Property> ubicacionLike(String q) { return (r,qb,cb) -> cb.like(cb.lower(r.get("ubicacion")), "%"+q.toLowerCase()+"%"); }
 }

@@ -1,0 +1,156 @@
+<div class="admin">
+  <div class="container admin__inner">
+    <h1 class="admin__title">Panel de Administración</h1>
+
+    <!-- Tabs -->
+    <nav class="admin__tabs">
+      <button type="button" class="admin__tab" [class.is-active]="activeTab() === 'metricas'" (click)="setTab('metricas')">
+        📊 Métricas
+      </button>
+      <button type="button" class="admin__tab" [class.is-active]="activeTab() === 'usuarios'" (click)="setTab('usuarios')">
+        👥 Usuarios
+      </button>
+    </nav>
+
+    <!-- Mensajes globales -->
+    @if (successMsg()) {
+      <div class="alert alert--success">✓ {{ successMsg() }}</div>
+    }
+    @if (errorMsg()) {
+      <div class="alert alert--error">✗ {{ errorMsg() }}</div>
+    }
+
+    <!-- ── TAB: MÉTRICAS ── -->
+    @if (activeTab() === 'metricas') {
+      @if (metrics(); as m) {
+        <div class="metrics">
+          <div class="metric-card metric-card--blue">
+            <span class="metric-card__value">{{ m.totalUsuarios }}</span>
+            <span class="metric-card__label">Usuarios registrados</span>
+          </div>
+          <div class="metric-card metric-card--teal">
+            <span class="metric-card__value">{{ m.totalPropiedades }}</span>
+            <span class="metric-card__label">Propiedades totales</span>
+          </div>
+          <div class="metric-card metric-card--green">
+            <span class="metric-card__value">{{ m.propiedadesVenta }}</span>
+            <span class="metric-card__label">En venta</span>
+          </div>
+          <div class="metric-card metric-card--orange">
+            <span class="metric-card__value">{{ m.propiedadesAlquiler }}</span>
+            <span class="metric-card__label">En alquiler</span>
+          </div>
+          <div class="metric-card metric-card--yellow">
+            <span class="metric-card__value">{{ m.propiedadesPendientes }}</span>
+            <span class="metric-card__label">Pendientes de aprobación</span>
+          </div>
+          <div class="metric-card metric-card--green">
+            <span class="metric-card__value">{{ m.propiedadesActivas }}</span>
+            <span class="metric-card__label">Propiedades activas</span>
+          </div>
+          <div class="metric-card metric-card--red">
+            <span class="metric-card__value">{{ m.propiedadesRechazadas }}</span>
+            <span class="metric-card__label">Rechazadas</span>
+          </div>
+          <div class="metric-card metric-card--purple">
+            <span class="metric-card__value">{{ m.propiedadesVendidas }}</span>
+            <span class="metric-card__label">Vendidas</span>
+          </div>
+          <div class="metric-card metric-card--teal">
+            <span class="metric-card__value">{{ m.totalContactClicks }}</span>
+            <span class="metric-card__label">Clicks de contacto</span>
+          </div>
+        </div>
+      } @else {
+        <p class="admin__loading">Cargando métricas...</p>
+      }
+    }
+
+    <!-- ── TAB: USUARIOS ── -->
+    @if (activeTab() === 'usuarios') {
+      @if (loading()) {
+        <p class="admin__loading">Cargando usuarios...</p>
+      } @else {
+        <div class="users-table-wrap">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Teléfono</th>
+                <th>Rol</th>
+                <th>Props.</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (user of users(); track user.id) {
+                <tr [class.is-inactive]="!user.activo">
+                  <td>{{ user.id }}</td>
+                  <td>{{ user.nombre }}</td>
+                  <td>{{ user.correo }}</td>
+                  <td>{{ user.telefono ?? '—' }}</td>
+                  <td><span class="badge" [class.badge--admin]="user.rol === 'ADMIN'">{{ user.rol }}</span></td>
+                  <td>{{ user.totalPropiedades }}</td>
+                  <td>
+                    <span class="badge" [class.badge--active]="user.activo" [class.badge--inactive]="!user.activo">
+                      {{ user.activo ? 'Activo' : 'Inactivo' }}
+                    </span>
+                  </td>
+                  <td class="actions">
+                    <button type="button" class="btn btn--sm btn--outline" (click)="openEdit(user)">Editar</button>
+                    <button type="button" class="btn btn--sm" [class.btn--danger]="user.activo" [class.btn--success]="!user.activo" (click)="toggleActive(user)">
+                      {{ user.activo ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+  </div>
+</div>
+
+<!-- Modal de edición de usuario -->
+@if (editingUser(); as user) {
+  <div class="modal-overlay" (click)="closeEdit()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <h2 class="modal-box__title">Editar usuario — {{ user.nombre }}</h2>
+
+      <form [formGroup]="editForm" (ngSubmit)="saveUser()" novalidate>
+        <label class="field">
+          <span class="field__label">Nombre</span>
+          <input type="text" formControlName="nombre" class="field__input" [class.is-invalid]="shouldShowError('nombre')" />
+          @if (shouldShowError('nombre')) { <small class="field__error">Mínimo 3 caracteres.</small> }
+        </label>
+
+        <label class="field">
+          <span class="field__label">Correo electrónico</span>
+          <input type="email" formControlName="correo" class="field__input" [class.is-invalid]="shouldShowError('correo')" />
+          @if (shouldShowError('correo')) { <small class="field__error">Correo inválido.</small> }
+        </label>
+
+        <label class="field">
+          <span class="field__label">Teléfono</span>
+          <input type="tel" formControlName="telefono" class="field__input" placeholder="Solo números" />
+        </label>
+
+        <label class="field">
+          <span class="field__label">Nueva contraseña <small>(dejar vacío para no cambiar)</small></span>
+          <input type="password" formControlName="nuevaContrasena" class="field__input" placeholder="Mínimo 8 caracteres" />
+        </label>
+
+        <div class="modal-box__actions">
+          <button type="button" class="btn btn--outline" (click)="closeEdit()">Cancelar</button>
+          <button type="submit" class="btn btn--primary" [disabled]="loading()">
+            {{ loading() ? 'Guardando...' : 'Guardar cambios' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
