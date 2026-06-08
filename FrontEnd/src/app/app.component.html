@@ -4,3 +4,6 @@
 </main>
 <app-footer />
 <app-property-detail-modal />
+@if (authService.isAuthenticated()) {
+  <app-chat />
+}

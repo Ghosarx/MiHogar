@@ -41,8 +41,13 @@ public class AuthService {
         if (userRepo.existsByCorreo(req.getCorreo())) {
             throw new ConflictException("El correo ya está registrado.");
         }
+        if (req.getDni() != null && userRepo.existsByDni(req.getDni())) {
+            throw new ConflictException("El DNI ya está registrado.");
+        }
         User user = User.builder()
                 .nombre(req.getNombre())
+                .apellido(req.getApellido())
+                .dni(req.getDni())
                 .correo(req.getCorreo())
                 .passwordHash(encoder.encode(req.getContrasena()))
                 .telefono(req.getTelefono())
@@ -115,8 +120,13 @@ public class AuthService {
         return AuthResponse.builder()
                 .accessToken(jwtUtil.generateAccessToken(user.getCorreo(), user.getRol().name()))
                 .refreshToken(jwtUtil.generateRefreshToken(user.getCorreo()))
+                .id(user.getId())
                 .correo(user.getCorreo())
                 .nombre(user.getNombre())
+                .apellido(user.getApellido())
+                .dni(user.getDni())
+                .telefono(user.getTelefono())
+                .fotoPerfil(user.getFotoPerfil())
                 .rol(user.getRol().name())
                 .build();
     }

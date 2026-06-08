@@ -18,11 +18,15 @@ public class PropertyDetailDTO {
     private List<String> imagenes;
     private List<String> amenidades;
     private OwnerDTO owner;
+    private Double promedioEstrellas;
+    private Long totalResenas;
 
     @Data @Builder @NoArgsConstructor @AllArgsConstructor
     public static class OwnerDTO {
         private Long id;
         private String nombre;
+        private String apellido;
         private String telefono;
+        private String fotoPerfil;
     }
 }

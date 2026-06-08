@@ -11,7 +11,9 @@ export interface PropertySummary {
 
 export interface PropertyDetail extends PropertySummary {
   descripcion: string; imagenes: string[]; amenidades: string[];
-  owner: { id: number; nombre: string; telefono: string | null };
+  owner: { id: number; nombre: string; apellido: string | null; telefono: string | null; fotoPerfil: string | null };
+  promedioEstrellas: number | null;
+  totalResenas: number | null;
 }
 
 export interface PageResponse<T> {
@@ -129,6 +131,10 @@ export class PropertyService {
       imagenes: imgs,
       ownerTelefono: p.owner?.telefono ?? undefined,
       ownerNombre: p.owner?.nombre,
+      ownerApellido: p.owner?.apellido ?? undefined,
+      ownerFoto: p.owner?.fotoPerfil ?? null,
+      promedioEstrellas: p.promedioEstrellas ?? undefined,
+      totalResenas: p.totalResenas ?? undefined,
     };
   }
 }

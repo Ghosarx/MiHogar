@@ -47,6 +47,17 @@ public class CloudinaryService {
         return urls;
     }
 
+    @SuppressWarnings("unchecked")
+    public String uploadFotoPerfil(MultipartFile file) {
+        try {
+            Map<String, Object> result = cloudinary.uploader().upload(file.getBytes(),
+                    ObjectUtils.asMap("folder", "mihogar/avatars", "transformation", "c_fill,w_200,h_200,g_face"));
+            return (String) result.get("secure_url");
+        } catch (IOException e) {
+            throw new RuntimeException("Error al subir foto de perfil: " + e.getMessage());
+        }
+    }
+
     public void deleteImage(String publicId) {
         try {
             cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());

@@ -15,4 +15,8 @@ export interface Property {
   imagenes: string[];   // todas las imágenes del BackEnd
   ownerTelefono?: string;
   ownerNombre?: string;
+  ownerApellido?: string;
+  ownerFoto?: string | null;
+  promedioEstrellas?: number;
+  totalResenas?: number;
 }

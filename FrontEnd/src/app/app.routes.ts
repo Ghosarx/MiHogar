@@ -51,6 +51,12 @@ export const routes: Routes = [
     title: 'Registro — MiHogar'
   },
   {
+    path: 'perfil',
+    canActivate: [authGuard],
+    loadComponent: () => import('./pages/perfil/perfil.component').then(m => m.PerfilComponent),
+    title: 'Mi Perfil — MiHogar'
+  },
+  {
     path: 'admin',
     canActivate: [adminGuard],
     loadComponent: () => import('./pages/admin/admin.component').then(m => m.AdminComponent),

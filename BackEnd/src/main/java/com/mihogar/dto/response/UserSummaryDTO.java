@@ -7,6 +7,9 @@ import java.time.LocalDateTime;
 public class UserSummaryDTO {
     private Long id;
     private String nombre;
+    private String apellido;
+    private String dni;
+    private String fotoPerfil;
     private String correo;
     private String telefono;
     private String rol;

@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AdminService, AdminMetrics, UserSummary } from '../../services/admin.service';
+import { ThemeService } from '../../services/theme.service';
 
 type Tab = 'metricas' | 'usuarios';
 
@@ -15,6 +16,7 @@ type Tab = 'metricas' | 'usuarios';
 export class AdminComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly fb = inject(FormBuilder);
+  readonly themeService = inject(ThemeService);
 
   readonly activeTab = signal<Tab>('metricas');
   readonly metrics = signal<AdminMetrics | null>(null);
@@ -24,55 +26,80 @@ export class AdminComponent implements OnInit {
   readonly successMsg = signal<string | null>(null);
   readonly editingUser = signal<UserSummary | null>(null);
 
-  // ── Datos derivados para gráficas ──────────────────────────────────────────
+  // ── KPI Cards ──────────────────────────────────────────────────────────────
 
-  readonly totalProps = computed(() => this.metrics()?.totalPropiedades ?? 0);
-
-  readonly barTipoData = computed(() => {
+  readonly kpiCards = computed(() => {
     const m = this.metrics();
     if (!m) return [];
-    const max = Math.max(m.propiedadesVenta, m.propiedadesAlquiler, 1);
     return [
-      { label: 'Venta',    value: m.propiedadesVenta,    pct: Math.round(m.propiedadesVenta / max * 100),    color: '#2ec4d4' },
-      { label: 'Alquiler', value: m.propiedadesAlquiler, pct: Math.round(m.propiedadesAlquiler / max * 100), color: '#f97316' },
+      { icon: 'home',   color: '#2dd4bf', bg: 'rgba(45,212,191,.12)', label: 'Total propiedades', value: m.totalPropiedades,    trend: '+' + m.propiedadesActivas,  trendPos: true,  sub: 'activas' },
+      { icon: 'check',  color: '#4ade80', bg: 'rgba(74,222,128,.12)', label: 'Propiedades activas', value: m.propiedadesActivas,   trend: m.propiedadesVenta + ' venta', trendPos: true,  sub: 'publicadas' },
+      { icon: 'click',  color: '#f472b6', bg: 'rgba(244,114,182,.12)', label: 'Clicks de contacto', value: m.totalContactClicks,   trend: m.propiedadesAlquiler + ' alq', trendPos: true,  sub: 'interacciones' },
+      { icon: 'users',  color: '#a78bfa', bg: 'rgba(167,139,250,.12)', label: 'Usuarios registrados', value: m.totalUsuarios,        trend: '0.00%',                     trendPos: true,  sub: 'último mes' },
     ];
   });
 
-  readonly barEstadoData = computed(() => {
+  // ── Line chart SVG (Propiedades por categoría) ────────────────────────────
+
+  readonly lineChart = computed(() => {
     const m = this.metrics();
-    if (!m) return [];
-    const max = Math.max(m.propiedadesActivas, m.propiedadesPendientes, m.propiedadesRechazadas, m.propiedadesVendidas, 1);
-    return [
-      { label: 'Activas',    value: m.propiedadesActivas,    pct: Math.round(m.propiedadesActivas    / max * 100), color: '#22c55e' },
-      { label: 'Pendientes', value: m.propiedadesPendientes, pct: Math.round(m.propiedadesPendientes / max * 100), color: '#eab308' },
-      { label: 'Rechazadas', value: m.propiedadesRechazadas, pct: Math.round(m.propiedadesRechazadas / max * 100), color: '#ef4444' },
-      { label: 'Vendidas',   value: m.propiedadesVendidas,   pct: Math.round(m.propiedadesVendidas   / max * 100), color: '#8b5cf6' },
-    ];
+    if (!m) return null;
+
+    const W = 600, H = 180, px = 10, py = 16;
+    const cW = W - px * 2, cH = H - py * 2;
+
+    const raw1 = [m.propiedadesVenta, m.propiedadesAlquiler, m.propiedadesActivas, m.propiedadesPendientes, m.propiedadesRechazadas, m.propiedadesVendidas, m.totalPropiedades];
+    const raw2 = raw1.map((v, i) => Math.max(0, v * [0.6, 0.7, 0.55, 0.8, 0.4, 0.65, 0.5][i]));
+    const labels = ['Venta', 'Alquiler', 'Activas', 'Pend.', 'Rechazo', 'Vendidas', 'Total'];
+    const maxVal = Math.max(...raw1, 1);
+
+    const toPoints = (vals: number[]) => vals.map((v, i) => ({
+      x: +(px + (i / (vals.length - 1)) * cW).toFixed(1),
+      y: +(py + cH - (v / maxVal) * cH).toFixed(1),
+    }));
+
+    const smooth = (pts: {x:number,y:number}[]) => {
+      let d = `M ${pts[0].x} ${pts[0].y}`;
+      for (let i = 1; i < pts.length; i++) {
+        const p = pts[i - 1], c = pts[i], mx = (p.x + c.x) / 2;
+        d += ` C ${mx} ${p.y},${mx} ${c.y},${c.x} ${c.y}`;
+      }
+      return d;
+    };
+
+    const p1 = toPoints(raw1), p2 = toPoints(raw2);
+    const path1 = smooth(p1);
+    const path2 = smooth(p2);
+    const area1 = path1 + ` L ${p1[p1.length-1].x} ${py+cH} L ${px} ${py+cH} Z`;
+    const yLines = [0, 25, 50, 75, 100].map(v => +(py + cH - (v / 100) * cH).toFixed(1));
+
+    return {
+      path1, path2, area1, labels, maxVal, W, H,
+      points: p1.map((p, i) => ({ ...p, val: raw1[i], label: labels[i] })),
+      yLines, bottom: py + cH,
+    };
   });
 
-  readonly donutSegments = computed(() => {
+  // ── Sidebar: top categories ───────────────────────────────────────────────
+
+  readonly categories = computed(() => {
     const m = this.metrics();
-    if (!m || m.totalPropiedades === 0) return [];
-    const total = m.totalPropiedades;
-    const items = [
-      { label: 'Venta',    value: m.propiedadesVenta,    color: '#2ec4d4' },
-      { label: 'Alquiler', value: m.propiedadesAlquiler, color: '#f97316' },
+    if (!m) return [];
+    const total = m.totalPropiedades || 1;
+    return [
+      { label: 'Venta',      sub: 'Propiedades en venta',    value: m.propiedadesVenta,    pct: Math.round(m.propiedadesVenta    / total * 100) },
+      { label: 'Alquiler',   sub: 'Propiedades en alquiler', value: m.propiedadesAlquiler, pct: Math.round(m.propiedadesAlquiler / total * 100) },
+      { label: 'Activas',    sub: 'Publicaciones activas',   value: m.propiedadesActivas,  pct: Math.round(m.propiedadesActivas  / total * 100) },
+      { label: 'Pendientes', sub: 'En espera de aprobación', value: m.propiedadesPendientes, pct: Math.round(m.propiedadesPendientes / total * 100) },
+      { label: 'Rechazadas', sub: 'No aprobadas',            value: m.propiedadesRechazadas, pct: Math.round(m.propiedadesRechazadas / total * 100) },
     ];
-    let offset = 0;
-    return items.map(item => {
-      const pct = item.value / total;
-      const dashArray = `${pct * 251.2} ${251.2}`;
-      const segment = { ...item, dashArray, offset: offset * 251.2, pct: Math.round(pct * 100) };
-      offset += pct;
-      return segment;
-    });
   });
 
   readonly editForm = this.fb.group({
-    nombre:         ['', [Validators.required, Validators.minLength(3)]],
-    correo:         ['', [Validators.required, Validators.email]],
-    telefono:       ['', [Validators.pattern(/^[0-9]{6,15}$/)]],
-    nuevaContrasena:[''],
+    nombre:          ['', [Validators.required, Validators.minLength(3)]],
+    correo:          ['', [Validators.required, Validators.email]],
+    telefono:        ['', [Validators.pattern(/^[0-9]{6,15}$/)]],
+    nuevaContrasena: [''],
   });
 
   ngOnInit(): void { this.loadMetrics(); this.loadUsers(); }
@@ -82,7 +109,7 @@ export class AdminComponent implements OnInit {
   loadMetrics(): void {
     this.adminService.getMetrics().subscribe({
       next: (m) => this.metrics.set(m),
-      error: () => this.errorMsg.set('Error al cargar métricas.')
+      error: () => this.errorMsg.set('Error al cargar métricas.'),
     });
   }
 
@@ -90,7 +117,7 @@ export class AdminComponent implements OnInit {
     this.loading.set(true);
     this.adminService.listUsers().subscribe({
       next: (page) => { this.users.set(page.content); this.loading.set(false); },
-      error: () => { this.errorMsg.set('Error al cargar usuarios.'); this.loading.set(false); }
+      error: () => { this.errorMsg.set('Error al cargar usuarios.'); this.loading.set(false); },
     });
   }
 
@@ -114,10 +141,10 @@ export class AdminComponent implements OnInit {
       next: (updated) => {
         this.users.update(list => list.map(u => u.id === updated.id ? updated : u));
         this.loading.set(false);
-        this.successMsg.set(`Usuario ${updated.nombre} actualizado correctamente.`);
+        this.successMsg.set(`Usuario ${updated.nombre} actualizado.`);
         this.closeEdit();
       },
-      error: (err) => { this.loading.set(false); this.errorMsg.set(err.error?.message ?? 'Error al actualizar usuario.'); }
+      error: (err) => { this.loading.set(false); this.errorMsg.set(err.error?.message ?? 'Error al actualizar.'); },
     });
   }
 
@@ -127,12 +154,16 @@ export class AdminComponent implements OnInit {
         this.users.update(list => list.map(u => u.id === updated.id ? updated : u));
         this.successMsg.set(`Usuario ${updated.nombre} ${updated.activo ? 'activado' : 'desactivado'}.`);
       },
-      error: () => this.errorMsg.set('Error al cambiar estado.')
+      error: () => this.errorMsg.set('Error al cambiar estado.'),
     });
   }
 
   shouldShowError(field: string): boolean {
     const ctrl = this.editForm.get(field);
     return !!ctrl && ctrl.invalid && (ctrl.touched || ctrl.dirty);
+  }
+
+  iniciales(nombre: string): string {
+    return nombre.trim().split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
   }
 }

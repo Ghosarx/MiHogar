@@ -65,6 +65,8 @@ public class AdminService {
         }
 
         user.setNombre(req.getNombre());
+        if (req.getApellido() != null) user.setApellido(req.getApellido());
+        if (req.getDni() != null && !req.getDni().isBlank()) user.setDni(req.getDni());
         user.setCorreo(req.getCorreo());
         if (req.getTelefono() != null && !req.getTelefono().isBlank()) {
             user.setTelefono(req.getTelefono());
@@ -101,7 +103,8 @@ public class AdminService {
     private UserSummaryDTO toUserSummary(User u) {
         long props = propertyRepo.countByOwnerIdAndDeletedAtIsNull(u.getId());
         return UserSummaryDTO.builder()
-                .id(u.getId()).nombre(u.getNombre()).correo(u.getCorreo())
+                .id(u.getId()).nombre(u.getNombre()).apellido(u.getApellido())
+                .dni(u.getDni()).fotoPerfil(u.getFotoPerfil()).correo(u.getCorreo())
                 .telefono(u.getTelefono()).rol(u.getRol().name())
                 .activo(u.getActivo()).createdAt(u.getCreatedAt())
                 .totalPropiedades(props).build();

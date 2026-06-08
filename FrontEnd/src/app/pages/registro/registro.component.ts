@@ -41,7 +41,9 @@ export class RegistroComponent {
   });
 
   readonly registerForm = this.fb.group({
-    nombre: this.fb.nonNullable.control('', [Validators.required, Validators.minLength(3)]),
+    nombre: this.fb.nonNullable.control('', [Validators.required, Validators.minLength(2)]),
+    apellido: this.fb.nonNullable.control('', [Validators.required, Validators.minLength(2)]),
+    dni: this.fb.nonNullable.control('', [Validators.required, Validators.pattern(/^[0-9]{8}$/)]),
     correo: this.fb.nonNullable.control('', [Validators.required, Validators.email]),
     contrasena: this.fb.nonNullable.control('', [Validators.required, Validators.minLength(8)]),
     telefono: this.fb.nonNullable.control('', [Validators.required, Validators.pattern(/^[0-9]{6,15}$/)]),
@@ -76,7 +78,11 @@ export class RegistroComponent {
     if (ctrl.errors['required']) return 'Este campo es obligatorio.';
     if (ctrl.errors['minlength']) return `Mínimo ${ctrl.errors['minlength'].requiredLength} caracteres.`;
     if (ctrl.errors['email']) return 'Ingresa un correo válido.';
-    if (ctrl.errors['pattern']) { if (field === 'telefono') return 'Solo números, entre 6 y 15 dígitos.'; if (field === 'codigo') return 'El código tiene 6 dígitos numéricos.'; }
+    if (ctrl.errors['pattern']) {
+      if (field === 'telefono') return 'Solo números, entre 6 y 15 dígitos.';
+      if (field === 'codigo') return 'El código tiene 6 dígitos numéricos.';
+      if (field === 'dni') return 'El DNI debe tener exactamente 8 dígitos.';
+    }
     return 'Campo inválido.';
   }
 

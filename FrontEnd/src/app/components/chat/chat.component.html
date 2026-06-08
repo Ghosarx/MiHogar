@@ -1,0 +1,137 @@
+<!-- FAB flotante -->
+<button
+  type="button"
+  class="chat-fab"
+  [class.is-open]="chatService.panelAbierto()"
+  (click)="togglePanel()"
+  title="Mensajes"
+  aria-label="Abrir mensajes"
+>
+  @if (chatService.panelAbierto()) {
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 6L6 18M6 6l12 12"/>
+    </svg>
+  } @else {
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  }
+  @if (!chatService.panelAbierto() && chatService.totalNoLeidos() > 0) {
+    <span class="chat-fab__badge">{{ chatService.totalNoLeidos() }}</span>
+  }
+</button>
+
+@if (chatService.panelAbierto()) {
+  <div class="chat-overlay" (click)="chatService.cerrarPanel()"></div>
+}
+
+@if (chatService.panelAbierto()) {
+<div class="chat-panel">
+  <!-- CABECERA DEL PANEL -->
+  <div class="chat-panel__header">
+    @if (chatService.chatAbierto()) {
+      <button type="button" class="chat-panel__back" (click)="chatService.cerrarChat()" title="Volver">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 18l-6-6 6-6"/>
+        </svg>
+      </button>
+      <div class="chat-panel__who">
+        <div class="chat-avatar chat-avatar--sm">
+          @if (chatService.chatAbierto()!.otroUsuarioFoto) {
+            <img [src]="chatService.chatAbierto()!.otroUsuarioFoto!" alt="" class="chat-avatar__img" />
+          } @else {
+            {{ iniciales(chatService.chatAbierto()!.otroUsuarioNombre, chatService.chatAbierto()!.otroUsuarioApellido) }}
+          }
+        </div>
+        <div>
+          <div class="chat-panel__who-name">{{ nombreOtro(chatService.chatAbierto()) }}</div>
+          @if (chatService.chatAbierto()!.propiedadTitulo) {
+            <div class="chat-panel__who-prop">{{ chatService.chatAbierto()!.propiedadTitulo }}</div>
+          }
+        </div>
+      </div>
+    } @else {
+      <span class="chat-panel__title">Mensajes</span>
+    }
+    <button type="button" class="chat-panel__close" (click)="chatService.cerrarPanel()" title="Cerrar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- LISTA DE CHATS -->
+  @if (!chatService.chatAbierto()) {
+    <div class="chat-list">
+      @if (chatService.chats().length === 0) {
+        <div class="chat-empty">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          <p>Sin mensajes aún.<br>Escríbele al vendedor desde una propiedad.</p>
+        </div>
+      }
+      @for (chat of chatService.chats(); track chat.id) {
+        <button type="button" class="chat-item" (click)="chatService.abrirChat(chat)">
+          <div class="chat-avatar">
+            @if (chat.otroUsuarioFoto) {
+              <img [src]="chat.otroUsuarioFoto" alt="" class="chat-avatar__img" />
+            } @else {
+              {{ iniciales(chat.otroUsuarioNombre, chat.otroUsuarioApellido) }}
+            }
+          </div>
+          <div class="chat-item__body">
+            <div class="chat-item__top">
+              <span class="chat-item__name">{{ nombreOtro(chat) }}</span>
+              @if (chat.ultimoMensajeEn) {
+                <span class="chat-item__time">{{ chat.ultimoMensajeEn | date:'HH:mm' }}</span>
+              }
+            </div>
+            <div class="chat-item__preview">
+              <span>{{ chat.propiedadTitulo ?? 'Chat directo' }}</span>
+              @if (chat.noLeidos > 0) {
+                <span class="chat-badge">{{ chat.noLeidos }}</span>
+              }
+            </div>
+            @if (chat.ultimoMensaje) {
+              <span class="chat-item__last">{{ chat.ultimoMensaje }}</span>
+            }
+          </div>
+        </button>
+      }
+    </div>
+  }
+
+  <!-- VENTANA DE MENSAJES -->
+  @if (chatService.chatAbierto()) {
+    <div class="chat-messages" #msgList>
+      @if (chatService.loadingMensajes()) {
+        <div class="chat-loading">Cargando mensajes...</div>
+      }
+      @for (msg of chatService.mensajes(); track msg.id) {
+        <div class="msg-bubble" [class.msg-bubble--mine]="msg.remitenteId === miId()">
+          <p class="msg-bubble__text">{{ msg.contenido }}</p>
+          <span class="msg-bubble__time">{{ msg.enviadoEn | date:'HH:mm' }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="chat-input">
+      <textarea
+        [value]="texto()"
+        (input)="texto.set($any($event.target).value)"
+        (keydown)="onKeyDown($event)"
+        placeholder="Escribe un mensaje..."
+        rows="1"
+        class="chat-input__field"
+      ></textarea>
+      <button type="button" class="chat-input__send" (click)="enviar()" [disabled]="!texto().trim()" title="Enviar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  }
+</div>
+}

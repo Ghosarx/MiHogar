@@ -125,18 +125,51 @@
             </div>
 
             <form [formGroup]="registerForm" (ngSubmit)="onRegister()" novalidate class="auth__form">
+              <div class="field-row">
+                <label class="field">
+                  <span class="field__label">Nombre</span>
+                  <input
+                    type="text"
+                    formControlName="nombre"
+                    placeholder="Ej. María"
+                    autocomplete="given-name"
+                    class="field__input"
+                    [class.is-invalid]="shouldShowError(registerForm, 'nombre')"
+                  />
+                  @if (shouldShowError(registerForm, 'nombre')) {
+                    <small class="field__error">{{ errorMessage(registerForm, 'nombre') }}</small>
+                  }
+                </label>
+                <label class="field">
+                  <span class="field__label">Apellido</span>
+                  <input
+                    type="text"
+                    formControlName="apellido"
+                    placeholder="Ej. García"
+                    autocomplete="family-name"
+                    class="field__input"
+                    [class.is-invalid]="shouldShowError(registerForm, 'apellido')"
+                  />
+                  @if (shouldShowError(registerForm, 'apellido')) {
+                    <small class="field__error">{{ errorMessage(registerForm, 'apellido') }}</small>
+                  }
+                </label>
+              </div>
+
               <label class="field">
-                <span class="field__label">Nombre completo</span>
+                <span class="field__label">DNI</span>
                 <input
                   type="text"
-                  formControlName="nombre"
-                  placeholder="Ej. María García"
-                  autocomplete="name"
+                  inputmode="numeric"
+                  maxlength="8"
+                  formControlName="dni"
+                  placeholder="12345678"
+                  autocomplete="off"
                   class="field__input"
-                  [class.is-invalid]="shouldShowError(registerForm, 'nombre')"
+                  [class.is-invalid]="shouldShowError(registerForm, 'dni')"
                 />
-                @if (shouldShowError(registerForm, 'nombre')) {
-                  <small class="field__error">{{ errorMessage(registerForm, 'nombre') }}</small>
+                @if (shouldShowError(registerForm, 'dni')) {
+                  <small class="field__error">{{ errorMessage(registerForm, 'dni') }}</small>
                 }
               </label>
 

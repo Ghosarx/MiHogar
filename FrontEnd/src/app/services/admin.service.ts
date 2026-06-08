@@ -18,7 +18,7 @@ export interface UserSummary {
   id: number;
   nombre: string;
   correo: string;
-  telefono: string;
+  telefono: string | null;
   rol: string;
   activo: boolean;
   createdAt: string;

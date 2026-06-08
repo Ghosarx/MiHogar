@@ -7,6 +7,7 @@ import com.mihogar.entity.*;
 import com.mihogar.exception.ForbiddenException;
 import com.mihogar.exception.NotFoundException;
 import com.mihogar.repository.PropertyRepository;
+import com.mihogar.repository.ReviewRepository;
 import com.mihogar.repository.TagRepository;
 import com.mihogar.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class PropertyService {
     private final PropertyRepository propertyRepo;
     private final UserRepository userRepo;
     private final TagRepository tagRepo;
+    private final ReviewRepository reviewRepo;
 
     // ── Catálogo público ──────────────────────────────────────────────────────
 
@@ -162,7 +164,11 @@ public class PropertyService {
                 .banos(p.getBanos()).metraje(p.getMetraje()).imagenes(imgs).amenidades(tagNames)
                 .owner(PropertyDetailDTO.OwnerDTO.builder()
                         .id(p.getOwner().getId()).nombre(p.getOwner().getNombre())
-                        .telefono(p.getOwner().getTelefono()).build())
+                        .apellido(p.getOwner().getApellido())
+                        .telefono(p.getOwner().getTelefono())
+                        .fotoPerfil(p.getOwner().getFotoPerfil()).build())
+                .promedioEstrellas(reviewRepo.avgByPropiedad(p.getId()))
+                .totalResenas(reviewRepo.countByPropiedad(p.getId()))
                 .build();
     }
 

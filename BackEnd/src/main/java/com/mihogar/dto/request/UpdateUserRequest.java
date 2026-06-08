@@ -8,7 +8,9 @@ import lombok.AllArgsConstructor;
 @Data @NoArgsConstructor @AllArgsConstructor
 public class UpdateUserRequest {
     @NotBlank private String nombre;
+    private String apellido;
+    @Pattern(regexp = "^[0-9]{8}$") private String dni;
     @NotBlank @Email private String correo;
     @Pattern(regexp = "^[0-9]{6,15}$") private String telefono;
-    private String nuevaContrasena; // opcional, si viene se actualiza
+    private String nuevaContrasena;
 }

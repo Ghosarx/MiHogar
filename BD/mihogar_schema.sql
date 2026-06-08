@@ -13,6 +13,9 @@ USE mihogar;
 CREATE TABLE usuarios (
     id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nombre        VARCHAR(100)  NOT NULL,
+    apellido      VARCHAR(100)  NULL,
+    dni           VARCHAR(8)    NULL,
+    foto_perfil   VARCHAR(500)  NULL,
     correo        VARCHAR(150)  NOT NULL,
     contrasena    VARCHAR(255)  NOT NULL,
     telefono      VARCHAR(20)   NULL,
@@ -20,7 +23,8 @@ CREATE TABLE usuarios (
     activo        TINYINT(1)    NOT NULL DEFAULT 1,
     creado_en     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     actualizado_en DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT uq_usuarios_correo UNIQUE (correo)
+    CONSTRAINT uq_usuarios_correo UNIQUE (correo),
+    CONSTRAINT uq_usuarios_dni    UNIQUE (dni)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE tokens_recuperacion (
@@ -100,6 +104,34 @@ CREATE TABLE mensajes_contacto (
     INDEX idx_mc_leido  (leido)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE chats (
+    id           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    usuario1_id  BIGINT UNSIGNED NOT NULL,
+    usuario2_id  BIGINT UNSIGNED NOT NULL,
+    propiedad_id BIGINT UNSIGNED NULL,
+    creado_en    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_chat_u1       FOREIGN KEY (usuario1_id)  REFERENCES usuarios(id)    ON DELETE CASCADE,
+    CONSTRAINT fk_chat_u2       FOREIGN KEY (usuario2_id)  REFERENCES usuarios(id)    ON DELETE CASCADE,
+    CONSTRAINT fk_chat_prop     FOREIGN KEY (propiedad_id) REFERENCES propiedades(id) ON DELETE SET NULL,
+    UNIQUE KEY uq_chat (usuario1_id, usuario2_id, propiedad_id),
+    INDEX idx_chat_u1 (usuario1_id),
+    INDEX idx_chat_u2 (usuario2_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE mensajes (
+    id           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    chat_id      BIGINT UNSIGNED NOT NULL,
+    remitente_id BIGINT UNSIGNED NOT NULL,
+    contenido    TEXT            NOT NULL,
+    leido        TINYINT(1)      NOT NULL DEFAULT 0,
+    enviado_en   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_msg_chat      FOREIGN KEY (chat_id)      REFERENCES chats(id)    ON DELETE CASCADE,
+    CONSTRAINT fk_msg_remitente FOREIGN KEY (remitente_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+    INDEX idx_msg_chat       (chat_id),
+    INDEX idx_msg_leido      (leido),
+    INDEX idx_msg_enviado_en (enviado_en)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE tags (
     id        BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     nombre    VARCHAR(60)  NOT NULL,
@@ -113,6 +145,20 @@ CREATE TABLE propiedad_tags (
     PRIMARY KEY (propiedad_id, tag_id),
     CONSTRAINT fk_pt_propiedad FOREIGN KEY (propiedad_id) REFERENCES propiedades(id) ON DELETE CASCADE,
     CONSTRAINT fk_pt_tag       FOREIGN KEY (tag_id)       REFERENCES tags(id)        ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE resenas (
+    id           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    propiedad_id BIGINT UNSIGNED NOT NULL,
+    usuario_id   BIGINT UNSIGNED NOT NULL,
+    estrellas    TINYINT UNSIGNED NOT NULL CHECK (estrellas BETWEEN 1 AND 5),
+    comentario   VARCHAR(500)    NULL,
+    creado_en    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_res_propiedad FOREIGN KEY (propiedad_id) REFERENCES propiedades(id) ON DELETE CASCADE,
+    CONSTRAINT fk_res_usuario   FOREIGN KEY (usuario_id)   REFERENCES usuarios(id)    ON DELETE CASCADE,
+    CONSTRAINT uq_resena        UNIQUE (usuario_id, propiedad_id),
+    INDEX idx_res_propiedad (propiedad_id),
+    INDEX idx_res_usuario   (usuario_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO tags (nombre, categoria) VALUES
@@ -161,10 +207,10 @@ INSERT INTO tags (nombre, categoria) VALUES
 ('Colegio cercano',          'extras'),
 ('Hospital cercano',         'extras');
 
-INSERT INTO usuarios (nombre, correo, contrasena, telefono, rol) VALUES
-('Admin MiHogar',  'admin@mihogar.pe',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '999000001', 'ADMIN'),
-('Carlos Mendoza', 'carlos@mihogar.pe', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '987654321', 'USER'),
-('María López',    'maria@mihogar.pe',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '998765432', 'USER');
+INSERT INTO usuarios (nombre, apellido, dni, correo, contrasena, telefono, rol) VALUES
+('Admin',   'MiHogar',  '00000001', 'admin@mihogar.pe',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '999000001', 'ADMIN'),
+('Carlos',  'Mendoza',  '12345678', 'carlos@mihogar.pe', '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '987654321', 'USER'),
+('María',   'López',    '87654321', 'maria@mihogar.pe',  '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '998765432', 'USER');
 
 INSERT INTO propiedades (propietario_id, titulo, descripcion, precio, ubicacion, tipo, estado, habitaciones, banos, metraje_m2) VALUES
 (2, 'Departamento moderno en Miraflores', 'Hermoso departamento totalmente amoblado con acabados de primera, ubicado a pasos del malecón.', 285000, 'Miraflores, Lima', 'venta', 'ACTIVO', 3, 2, 95),
