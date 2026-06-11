@@ -1,0 +1,144 @@
+==================================================================
+MIHOGAR - GUIA RAPIDA DE ARQUITECTURA
+==================================================================
+Stack: Angular 19 (standalone) + Spring Boot 3.2.5 + MySQL + JWT + Cloudinary
+
+------------------------------------------------------------------
+1. FRONTEND (FrontEnd/src/app)
+------------------------------------------------------------------
+Carpetas:
+  pages/       -> paginas (rutas), ej: catalogo, publicar, mi-panel, perfil, admin
+  components/  -> componentes reutilizables (navbar, footer, property-card, modal)
+  services/    -> logica de datos / llamadas a la API
+  models/      -> interfaces TypeScript (property.model.ts, etc.)
+  guards/      -> auth.guard.ts, admin.guard.ts (protegen rutas)
+  interceptors/-> jwt.interceptor.ts (agrega el token a cada request)
+
+PADRE -> HIJO (ejemplo real):
+  catalogo.component.html itera propiedades y usa:
+    <app-property-card [property]="prop" (detailClick)="onPropertyClick($event)" />
+
+  property-card.component.ts recibe/emite con la API moderna de signals:
+    readonly property = input.required<Property>();   // como @Input
+    readonly detailClick = output<Property>();         // como @Output
+    -> al hacer click llama this.detailClick.emit(this.property())
+
+  El padre escucha el evento y abre el modal de detalle (modal.service.ts).
+
+SERVICIOS (se inyectan con inject(), no con constructor):
+  AuthService     -> login/registro, guarda JWT en localStorage, signals:
+                     user, isAuthenticated, isAdmin
+  PropertyService -> CRUD de propiedades (create/update/delete/list/mine)
+  UserService     -> "mis propiedades" del usuario logueado
+  AdminService    -> métricas, gestion de usuarios y propiedades (admin)
+  TagService      -> carga amenidades/tags agrupadas por categoria
+  ReviewService   -> reseñas de propiedades
+  ChatService     -> mensajeria entre usuarios
+
+  Uso típico dentro de un componente:
+    private readonly propertyService = inject(PropertyService);
+    this.propertyService.create(payload).subscribe({ next: ... , error: ... });
+
+CONEXION CON LA API:
+  - Todas las URLs apuntan a http://localhost:8080/api/...
+  - app.config.ts registra el interceptor:
+        provideHttpClient(withInterceptors([jwtInterceptor]))
+  - jwt.interceptor.ts agrega "Authorization: Bearer <token>" a cada request
+    y si la respuesta es 401 hace logout() y redirige a /login.
+  - Rutas protegidas (app.routes.ts) usan canActivate: [authGuard] o [adminGuard].
+
+------------------------------------------------------------------
+2. BACKEND (BackEnd/src/main/java/com/mihogar)
+------------------------------------------------------------------
+Paquetes:
+  controller/  -> endpoints REST (@RestController)
+  service/     -> logica de negocio (@Service)
+  repository/  -> interfaces JpaRepository (acceso a BD)
+  entity/      -> tablas/entidades JPA (@Entity)
+  dto/request  -> objetos que llegan en el body (con validaciones @Valid)
+  dto/response -> objetos que se devuelven al frontend
+  config/      -> SecurityConfig (CORS, reglas de seguridad)
+  security/    -> JwtAuthenticationFilter, CustomUserDetailsService
+  util/        -> JwtUtil (genera/valida tokens)
+  exception/   -> excepciones custom (NotFound, Forbidden, etc.)
+
+COMO SE CREA UN ENDPOINT NUEVO (patron: Controller -> Service -> Repository):
+  1) Controller: recibe la request, valida con @Valid, delega al Service
+       @PostMapping("/api/properties/{id}/reviews")
+       @PreAuthorize("isAuthenticated()")
+       public ResponseEntity<ReviewResponse> crear(@PathVariable Long id,
+             @RequestBody @Valid ReviewRequest req,
+             @AuthenticationPrincipal String correo) {
+           return ResponseEntity.status(201).body(reviewService.crear(id, correo, req));
+       }
+  2) Service: logica de negocio + @Transactional si escribe en BD
+  3) Repository: extiende JpaRepository<Entidad, Long> -> save/findById/findAll/delete gratis
+
+  Anotaciones clave: @RestController, @RequestMapping, @GetMapping/@PostMapping/
+  @PutMapping/@DeleteMapping, @PathVariable, @RequestParam, @RequestBody, @Valid,
+  @PreAuthorize("isAuthenticated()") / @PreAuthorize("hasRole('ADMIN')"),
+  @AuthenticationPrincipal (devuelve el correo del usuario del token).
+
+------------------------------------------------------------------
+3. CREDENCIALES Y CONFIGURACION
+------------------------------------------------------------------
+Todo vive en: BackEnd/src/main/resources/application.yml
+  - BD MySQL: url, usuario, password (jdbc:mysql://localhost:3306/mihogar)
+  - JWT: app.jwt.secret + tiempos de expiracion (access 1h, refresh 7 dias)
+  - Cloudinary: app.cloudinary.cloud-name / api-key / api-secret (subida de imagenes)
+  - Mail (recuperacion de contraseña): spring.mail.* (Mailtrap)
+  - CORS: app.cors.allowed-origins = http://localhost:4200
+
+  IMPORTANTE: cualquier cambio en application.yml requiere REINICIAR el backend
+  (los @Value se inyectan solo al arrancar).
+
+------------------------------------------------------------------
+4. SEGURIDAD (JWT)
+------------------------------------------------------------------
+  1) AuthService.login() valida correo+password (BCrypt) y genera un JWT con
+     JwtUtil (incluye correo y rol como claims).
+  2) Frontend guarda el token en localStorage (auth.service.ts).
+  3) Cada request sale con header "Authorization: Bearer <token>".
+  4) JwtAuthenticationFilter (backend) intercepta, valida el token con JwtUtil,
+     y si es valido crea una Authentication en el SecurityContext con rol
+     "ROLE_USER" o "ROLE_ADMIN".
+  5) SecurityConfig define reglas globales:
+       /api/auth/**        -> publico
+       GET /api/properties -> publico (catalogo)
+       /api/admin/**       -> solo ROLE_ADMIN
+       resto               -> requiere estar autenticado
+     Ademas cada metodo puede reforzar con @PreAuthorize.
+
+------------------------------------------------------------------
+5. BASE DE DATOS (MySQL)
+------------------------------------------------------------------
+  - ddl-auto: none -> el esquema NO se genera automaticamente, se asume que
+    ya existe (creado manualmente / con script SQL).
+  - data.sql se ejecuta en cada arranque (mode: always) e inserta datos
+    "semilla" (ej. usuario admin) usando INSERT ... WHERE NOT EXISTS, para
+    no duplicar.
+
+  Entidades principales y relaciones:
+    User (usuarios)         1 ---- N  Property (propiedades)
+    Property                1 ---- N  PropertyImage (imagenes_propiedad)
+    Property                N ---- N  Tag (tags, via tabla propiedad_tags)
+    Property                1 ---- N  Review (resenas)
+    User <-> User                     Chat / Message (mensajeria)
+    Property                1 ---- N  ContactClick (analytics)
+
+  Property tiene "deletedAt" (soft delete) y "status" (PENDIENTE, ACTIVO,
+  RECHAZADO, VENDIDO). Solo se listan propiedades sin deletedAt y status=ACTIVO.
+
+------------------------------------------------------------------
+6. FLUJO DE EJEMPLO: PUBLICAR PROPIEDAD CON IMAGEN
+------------------------------------------------------------------
+  1. publicar.component.ts arma el payload (sin imagenes) y hace
+     POST /api/properties -> PropertyController.create() -> PropertyService.create()
+     guarda la Property con status ACTIVO.
+  2. Si hay archivos seleccionados, hace un 2do POST con FormData a
+     /api/properties/{id}/images -> CloudinaryService sube cada archivo
+     y devuelve URLs -> PropertyService.addImages() crea PropertyImage por
+     cada URL y las asocia a la Property (cascade ALL).
+  3. Al listar/ver detalle, PropertyService.toSummary()/toDetail() leen
+     property.getImagenes() y devuelven las URLs de Cloudinary directamente
+     (no se guardan archivos locales).

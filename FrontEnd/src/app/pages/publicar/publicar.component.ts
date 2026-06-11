@@ -150,7 +150,10 @@ export class PublicarComponent implements OnInit {
           files.forEach(f => form.append('files', f));
           this.http.post(`http://localhost:8080/api/properties/${prop.id}/images`, form).subscribe({
             next: () => { this.loading.set(false); this.onSuccess(v.titulo, v.tipo); },
-            error: () => { this.loading.set(false); this.onSuccess(v.titulo, v.tipo); }
+            error: (err) => {
+              this.loading.set(false);
+              this.errorMsg.set('La propiedad se guardó, pero las imágenes no se pudieron subir: ' + (err.error?.message || err.message || 'error desconocido'));
+            }
           });
         } else {
           this.loading.set(false);

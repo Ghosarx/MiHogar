@@ -6,6 +6,7 @@ BackEnd/*.class
 FrontEnd/node_modules/
 FrontEnd/dist/
 FrontEnd/.angular/
+FrontEnd/package-lock.json
 
 # IDE / OS
 .idea/

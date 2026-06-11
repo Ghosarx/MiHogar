@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/mihogar?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Lima&characterEncoding=UTF-8
     username: root
-    password: 123456789
+    password: mysql
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -41,9 +41,9 @@ server:
 
 app:
   cloudinary:
-    cloud-name: Root
-    api-key: 374673891499658
-    api-secret: Q5E-8F3Z0HdJ71u8Htuui5dkggs
+    cloud-name: dpdlpmjx4
+    api-key: 725452594655513
+    api-secret: vlI30VkRT6udvAIpa1Ct-n5Kt3Q
   jwt:
     secret: mihogar-super-secret-key-development-2024-change-in-production
     expiration: 3600000          # 1 hora en ms
